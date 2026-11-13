@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Visitas Técnicas LMSI - Melhoria Contínua v2</title>
+  <!-- SheetJS (Excel) & JSZip (Word .docx parser) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <style>
+    :root {
+      --primary: #1f4e79;
+      --primary-dark: #143554;
+      --accent: #2e75b6;
+      --teal: #3b6e75;
+      --success: #1e7e34;
+      --warning: #d39e00;
+      --danger: #c82333;
+      --bg: #f3f6f9;
+      --card: #ffffff;
+      --border: #d8e0e8;
+      --text: #1e293b;
+      --muted: #64748b;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 84px;
+    }
+    /* PIN LOCK OVERLAY */
+    #pinOverlay {
+      position: fixed; inset: 0; background: linear-gradient(135deg, #143554, #1f4e79);
+      z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .pin-card {
+      background: #fff; border-radius: 16px; max-width: 380px; width: 100%;
+      padding: 28px 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    .pin-card h2 { margin: 0 0 8px; color: var(--primary); font-size: 20px; }
+    .pin-card p { margin: 0 0 18px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .pin-input {
+      width: 100%; padding: 14px; font-size: 18px; text-align: center; letter-spacing: 3px;
+      border: 2px solid var(--border); border-radius: 10px; margin-bottom: 14px; font-weight: 700;
+    }
+    /* TOP HEADER */
+    header {
+      background: var(--primary); color: #fff; padding: 12px 16px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .header-top {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+    }
+    .brand { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .badge-sync {
+      font-size: 11px; padding: 4px 8px; border-radius: 999px; background: rgba(255,255,255,0.18);
+      font-weight: 600;
+    }
+    .toolbar {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;
+    }
+    .btn {
+      border: none; border-radius: 8px; padding: 9px 13px; font-size: 13px; font-weight: 600;
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      transition: transform 0.08s ease, opacity 0.15s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-green { background: #217346; color: #fff; }
+    .btn-blue { background: #2b579a; color: #fff; }
+    .btn-amber { background: #e67e22; color: #fff; }
+    .btn-purple { background: #6f42c1; color: #fff; }
+    .btn-outline { background: #fff; color: var(--primary); border: 1px solid var(--border); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .container { max-width: 1180px; margin: 14px auto; padding: 0 12px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .card-title {
+      font-size: 15px; font-weight: 700; color: var(--primary); margin: 0 0 10px;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+    }
+    .selector-bar {
+      display: grid; grid-template-columns: 1fr 150px; gap: 10px; align-items: end;
+    }
+    @media (max-width: 640px) {
+      .selector-bar { grid-template-columns: 1fr; }
+    }
+    label.field-lbl { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+    select, input[type="text"], input[type="date"], textarea {
+      width: 100%; padding: 10px 11px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 14px; font-family: inherit; background: #fff;
+    }
+    textarea { resize: vertical; min-height: 62px; }
+    /* NEEDS GRID */
+    .needs-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px;
+    }
+    .need-pill {
+      border-left: 4px solid var(--danger); background: #fff5f5; padding: 10px 12px;
+      border-radius: 8px; font-size: 13px;
+    }
+    .need-pill.ok { border-left-color: var(--success); background: #f0fdf4; }
+    .need-pill strong { display: block; color: var(--text); margin-bottom: 3px; }
+    /* OLD REPORT CARDS */
+    .old-item {
+      border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px;
+      display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: start; background: #fafbfc;
+    }
+    .old-item img {
+      width: 110px; height: 90px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border);
+      background: #eee;
+    }
+    /* ANEXO A TABLE & MOBILE CARDS */
+    .anexo-header {
+      color: var(--teal); font-size: 18px; font-weight: 800; margin: 4px 0 12px;
+    }
+    table.anexo-table {
+      width: 100%; border-collapse: collapse; background: #fff;
+    }
+    table.anexo-table th {
+      background: #7f7f7f; color: #fff; font-weight: 700; font-size: 13px;
+      padding: 10px; border: 1px solid #d0d0d0; text-align: center;
+    }
+    table.anexo-table td {
+      border: 1px solid #d0d0d0; padding: 10px; vertical-align: top;
+    }
+    .desc-label { font-weight: 700; font-size: 12px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
+    .photo-box {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .photo-preview {
+      width: 180px; max-width: 100%; height: 135px; object-fit: contain;
+      border: 1px dashed #94a3b8; border-radius: 8px; background: #f8fafc;
+    }
+    /* MOBILE ERGONOMIC VIEW */
+    @media (max-width: 768px) {
+      table.anexo-table thead { display: none; }
+      table.anexo-table, table.anexo-table tbody, table.anexo-table tr, table.anexo-table td {
+        display: block; width: 100%;
+      }
+      table.anexo-table tr {
+        margin-bottom: 14px; border: 2px solid var(--border); border-radius: 12px;
+        overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      }
+      table.anexo-table td { border: none; border-bottom: 1px solid #edf2f7; }
+      .photo-preview { width: 100%; height: 190px; }
+    }
+    /* BOTTOM NAV FOR MOBILE */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
+      background: #fff; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-around; align-items: center; z-index: 200;
+    }
+    .nav-tab {
+      flex: 1; text-align: center; font-size: 11px; font-weight: 600; color: var(--muted);
+      padding: 8px 4px; cursor: pointer; border: none; background: none;
+    }
+    .nav-tab.active { color: var(--primary); font-weight: 800; border-top: 3px solid var(--primary); }
+    .fab-camera {
+      position: fixed; right: 16px; bottom: 76px; z-index: 210;
+      background: var(--success); color: #fff; border: none; border-radius: 999px;
+      padding: 14px 18px; font-size: 14px; font-weight: 700;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25); cursor: pointer;
+    }
+    @media print {
+      header, .bottom-nav, .fab-camera, .no-print { display: none !important; }
+      body { background: #fff; padding: 0; }
+      .card { border: none; box-shadow: none; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ECRÃ DE PIN DA EQUIPA (PRIVACIDADE) -->
+  <div id="pinOverlay" style="display:none;">
+    <div class="pin-card">
+      <h2>🔒 Visitas Técnicas LMSI</h2>
+      <p>Introduz o PIN da equipa para desbloquear a aplicação neste dispositivo (predefinido: <strong>LMSI</strong> ou <strong>1234</strong>).</p>
+      <input type="password" id="pinInput" class="pin-input" placeholder="PIN da Equipa" />
+      <button class="btn btn-blue" style="width:100%; padding:13px;" onclick="unlockApp()">Entrar na Aplicação</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-top">
+      <div class="brand">
+        <span>🏢 Visitas Técnicas — Anexo A & MC v2</span>
+      </div>
+      <span class="badge-sync" id="syncStatus">Pronto (Offline / Local)</span>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-green" onclick="document.getElementById('excelInput').click()">📊 1. Carregar Excel (MC v2)</button>
+      <input type="file" id="excelInput" accept=".xlsx,.xlsm,.xls" style="display:none" onchange="handleExcelUpload(event)" />
+
+      <button class="btn btn-blue" onclick="document.getElementById('wordInput').click()">📄 2. Último Relatório (.docx)</button>
+      <input type="file" id="wordInput" accept=".docx,.docm" style="display:none" onchange="handleWordUpload(event)" />
+
+      <button class="btn btn-amber" onclick="exportVisitPackage()">📤 Guardar Visita p/ OneDrive</button>
+      <button class="btn btn-purple" onclick="document.getElementById('pkgInput').click()">📥 Abrir Visita do Telemóvel</button>
+      <input type="file" id="pkgInput" accept=".json" style="display:none" onchange="importVisitPackage(event)" />
+
+      <button class="btn btn-outline" onclick="copyTableForWord()">📋 Copiar Anexo A p/ Word</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- BARRA DE SELEÇÃO DO EDIFÍCIO -->
+    <div class="card">
+      <div class="selector-bar">
+        <div>
+          <label class="field-lbl">Edifício / Instalação (Carregado do Excel Melhoria Contínua v2)</label>
+          <select id="storeSelect" onchange="onStoreChange()">
+            <option value="">-- Carrega o Excel (MC v2) ou escreve manualmente abaixo --</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-lbl">Data da Visita</label>
+          <input type="date" id="visitDate" onchange="saveLocalState()" />
+        </div>
+      </div>
+      <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <input type="text" id="manualStoreName" placeholder="Nome do Edifício (se ainda não carregaste o Excel)" oninput="saveLocalState()" style="flex:1;" />
+      </div>
+    </div>
+
+    <!-- SECÇÃO 1: NECESSIDADES DO EXCEL -->
+    <div class="card" id="secNeeds">
+      <div class="card-title">
+        <span>1. Necessidades e Incumprimentos (Excel Melhoria Contínua v2)</span>
+        <span style="font-size:12px; color:var(--muted);" id="needsCountLbl"></span>
+      </div>
+      <div id="needsContainer" class="needs-grid">
+        <div class="need-pill ok">
+          <strong>Sem Excel carregado</strong>
+          Toca no botão verde <b>1. Carregar Excel (MC v2)</b> para ver automaticamente CE, PMP, RM/RC, QAI/ASA, Radão, Legionella e Deteção de Fugas desta instalação.
+        </div>
+      </div>
+    </div>
+
+    <!-- SECÇÃO 2: PROBLEMAS DO ÚLTIMO RELATÓRIO WORD -->
+    <div class="card" id="secOldWord">
+      <div class="card-title">
+        <span>2. Problemas do Último Relatório Word (.docx)</span>
+        <button class="btn btn-outline no-print" onclick="passAllOldToAnexo()">Passar Pendentes p/ Anexo A</button>
+      </div>
+      <div id="oldReportContainer">
+        <p style="font-size:13px; color:var(--muted); margin:0;">
+          Toca no botão azul <b>2. Último Relatório (.docx)</b> para extrair automaticamente os problemas e fotografias antigas do Anexo A anterior.
+        </p>
+      </div>
+    </div>
+
+    <!-- SECÇÃO 3: ANEXO A - REGISTO FOTOGRÁFICO DA VISITA -->
+    <div class="card" id="secAnexoA">
+      <div class="card-title">
+        <span class="anexo-header">ANEXO A – Registo Fotográfico da Visita</span>
+        <div class="no-print" style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn btn-green" onclick="addAnexoRow()">+ Adicionar Linha</button>
+          <button class="btn btn-blue" onclick="copyTableForWord()">📋 Copiar p/ Word</button>
+          <button class="btn btn-outline" onclick="window.print()">🖨️ PDF / Imprimir</button>
+        </div>
+      </div>
+
+      <table class="anexo-table" id="anexoTable">
+        <thead>
+          <tr>
+            <th style="width:18%;">Equipamento</th>
+            <th style="width:38%;">Descrição</th>
+            <th style="width:28%;">Foto</th>
+            <th style="width:16%;">Estado</th>
+          </tr>
+        </thead>
+        <tbody id="anexoBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- BOTÃO FLUTUANTE DE CÂMARA RÁPIDA NO TELEMÓVEL -->
+  <button class="fab-camera no-print" onclick="quickCameraRow()">📷 + Foto Rápida</button>
+  <input type="file" id="quickCamInput" accept="image/*" capture="environment" style="display:none" onchange="handleQuickCam(event)" />
+
+  <!-- NAVEGAÇÃO INFERIOR MOBILE -->
+  <nav class="bottom-nav no-print">
+    <button class="nav-tab active" onclick="scrollToSec('secNeeds', this)">⚠️ 1. Necessidades</button>
+    <button class="nav-tab" onclick="scrollToSec('secOldWord', this)">⏪ 2. Últ. Relatório</button>
+    <button class="nav-tab" onclick="scrollToSec('secAnexoA', this)">📷 3. Anexo A</button>
+    <button class="nav-tab" onclick="exportVisitPackage()">☁️ 4. Guardar Visita</button>
+  </nav>
+
+  <script>
+    // ESTADO PRINCIPAL
+    let storesData = [];
+    let oldAnexoItems = [];
+    let anexoRows = [
+      { id: Date.now() + 1, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' },
+      { id: Date.now() + 2, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' },
+      { id: Date.now() + 3, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }
+    ];
+
+    // INICIALIZAÇÃO
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('visitDate').valueAsDate = new Date();
+      checkPinLock();
+      loadLocalState();
+      renderAnexoRows();
+    });
+
+    function checkPinLock() {
+      // Se estiver alojado num link público (ex: github.io), pede PIN 1 vez e guarda no telemóvel
+      if (location.protocol.startsWith('http') && localStorage.getItem('lmsi_pin_ok') !== '1') {
+        document.getElementById('pinOverlay').style.display = 'flex';
+      }
+    }
+
+    function unlockApp() {
+      const val = (document.getElementById('pinInput').value || '').trim().toUpperCase();
+      if (val === 'LMSI' || val === '1234' || val === 'LMSI2026') {
+        localStorage.setItem('lmsi_pin_ok', '1');
+        document.getElementById('pinOverlay').style.display = 'none';
+      } else {
+        alert('PIN incorreto. Usa LMSI ou 1234.');
+      }
+    }
+
+    function scrollToSec(id, btn) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // =========================================================================
+    // 1. LEITURA DO EXCEL (MELHORIA CONTÍNUA v2)
+    // =========================================================================
+    function handleExcelUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const wb = XLSX.read(data, { type: 'array', cellDates: true });
+          const sheetName = wb.SheetNames.find(n => n.toLowerCase().includes('sheet') || n.toLowerCase().includes('cbre')) || wb.SheetNames[0];
+          const ws = wb.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          parseExcelRows(rows, file.name);
+        } catch (err) {
+          alert('Erro ao ler o ficheiro Excel: ' + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function parseExcelRows(rows, fileName) {
+      storesData = [];
+      const h1 = rows[0] || [];
+      const h2 = rows[1] || [];
+      const sel = document.getElementById('storeSelect');
+      sel.innerHTML = '<option value="">-- Seleciona o Edifício (' + fileName + ') --</option>';
+
+      for (let r = 2; r < rows.length; r++) {
+        const row = rows[r];
+        if (!row) continue;
+        // Suporta layout antigo (B=Empresa, C=Local) e layout novo MC v2 (A=Empresa, B=Edifício)
+        let emp = String(row[0] || '').trim();
+        let edif = String(row[1] || '').trim();
+        if (!edif || edif.toLowerCase().includes('email')) {
+          emp = String(row[1] || '').trim();
+          edif = String(row[2] || '').trim();
+        }
+        if (!edif) continue;
+
+        const needs = computeRowNeeds(row, h1, h2);
+        storesData.push({ rowIndex: r + 1, emp, edif, needs });
+        const opt = document.createElement('option');
+        opt.value = storesData.length - 1;
+        opt.textContent = `${edif} (${emp || 'LMSI'}) — ${needs.length} necessidade(s)`;
+        sel.appendChild(opt);
+      }
+      document.getElementById('syncStatus').textContent = `Excel: ${storesData.length} edifícios`;
+      if (storesData.length > 0) {
+        sel.value = 0;
+        onStoreChange();
+      }
+    }
+
+    function computeRowNeeds(row, h1, h2) {
+      const list = [];
+      const today = new Date();
+      // Mapeamento dinâmico pelos cabeçalhos da Linha 2
+      for (let c = 0; c < h2.length; c++) {
+        const colName = String(h2[c] || '').trim().toLowerCase();
+        const val = row[c];
+        const txt = formatCellVal(val);
+
+        if (colName === 'certificado energético' || colName === 'número') {
+          const exp = row[c + 1];
+          if (!txt || txt.toUpperCase() === 'NÃO' || txt.toUpperCase() === 'PES') {
+            list.push({ cat: 'Certificado Energético (CE)', msg: `Em falta / Não disponível (${txt || 'Vazio'})` });
+          } else if (exp instanceof Date && exp < today) {
+            list.push({ cat: 'Certificado Energético (CE)', msg: `Expirado a ${formatCellVal(exp)} (${txt})` });
+          }
+        }
+        if (colName.includes('plano de manutenção') || colName === 'plano manutenção') {
+          if (!txt || txt.toLowerCase().includes('não') || txt.toLowerCase().includes('sem')) {
+            list.push({ cat: 'Plano de Manutenção (PMP)', msg: txt || 'Em falta' });
+          }
+        }
+        if (colName.includes('registos de manutenção') || colName === 'registos manutenção') {
+          if (!txt || txt.toLowerCase().includes('sem') || txt.toLowerCase().includes('não')) {
+            list.push({ cat: 'Registos Manutenção (RM)', msg: txt || 'Em falta' });
+          }
+        }
+        if (colName.includes('registos de consumo') || colName === 'registos consumo') {
+          if (!txt || txt.toLowerCase().includes('sem') || txt.toLowerCase().includes('não')) {
+            list.push({ cat: 'Registos Consumo (RC)', msg: txt || 'Em falta' });
+          }
+        }
+        if (colName === 'qai conforme' || colName === 'qai') {
+          if (txt.toLowerCase().includes('não') || !txt) {
+            list.push({ cat: 'QAI / ASA', msg: `QAI Não Conforme / Sem registo (${txt || 'Vazio'})` });
+          }
+        }
+        if (colName === 'radão conforme' || colName === 'radão') {
+          if (txt.toLowerCase().includes('não')) {
+            list.push({ cat: 'Radão', msg: `Sem medição / Não conforme (${txt})` });
+          }
+        }
+        if (colName === 'equipamento' && txt && txt !== '-') {
+          // Verifica se tem data limite vencida nas colunas seguintes do bloco
+          for (let k = c + 1; k <= c + 8 && k < row.length; k++) {
+            const subH = String(h2[k] || '').toLowerCase();
+            if (subH.includes('limite') || subH.includes('próxim')) {
+              const dtLim = row[k];
+              if (dtLim instanceof Date && dtLim < today) {
+                list.push({ cat: `Equipamento (${txt})`, msg: `Inspeção vencida a ${formatCellVal(dtLim)}` });
+              }
+            }
+          }
+        }
+      }
+      return list;
+    }
+
+    function formatCellVal(v) {
+      if (v === null || v === undefined) return '';
+      if (v instanceof Date) return v.toLocaleDateString('pt-PT');
+      return String(v).trim();
+    }
+
+    function onStoreChange() {
+      const idx = document.getElementById('storeSelect').value;
+      const cont = document.getElementById('needsContainer');
+      if (idx === '' || !storesData[idx]) return;
+      const st = storesData[idx];
+      document.getElementById('manualStoreName').value = st.edif;
+      document.getElementById('needsCountLbl').textContent = `${st.needs.length} alerta(s)`;
+
+      if (st.needs.length === 0) {
+        cont.innerHTML = `<div class="need-pill ok"><strong>Tudo Conforme!</strong>Sem incumprimentos detetados na linha ${st.rowIndex}.</div>`;
+      } else {
+        cont.innerHTML = st.needs.map(n => `
+          <div class="need-pill">
+            <strong>${escapeHtml(n.cat)}</strong>
+            <span>${escapeHtml(n.msg)}</span>
+          </div>
+        `).join('');
+      }
+      saveLocalState();
+    }
+
+    // =========================================================================
+    // 2. LEITURA DO ÚLTIMO RELATÓRIO WORD (.docx) COM EXTRAÇÃO DE FOTOS
+    // =========================================================================
+    async function handleWordUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const cont = document.getElementById('oldReportContainer');
+      cont.innerHTML = '<p style="font-size:13px;">A extrair tabela e fotografias do Anexo A do Word...</p>';
+
+      try {
+        const zip = await JSZip.loadAsync(file);
+        const docXml = await zip.file('word/document.xml').async('string');
+        const relsXml = zip.file('word/_rels/document.xml.rels')
+          ? await zip.file('word/_rels/document.xml.rels').async('string')
+          : '';
+
+        // Mapear rId -> caminho da imagem dentro do .docx
+        const relMap = {};
+        const relParser = new DOMParser();
+        if (relsXml) {
+          const relDoc = relParser.parseFromString(relsXml, 'application/xml');
+          Array.from(relDoc.getElementsByTagName('Relationship')).forEach(r => {
+            relMap[r.getAttribute('Id')] = r.getAttribute('Target');
+          });
+        }
+
+        const xmlDoc = relParser.parseFromString(docXml, 'application/xml');
+        const tables = Array.from(xmlDoc.getElementsByTagName('w:tbl'));
+        oldAnexoItems = [];
+
+        for (const tbl of tables) {
+          const fullText = tbl.textContent || '';
+          if (fullText.toLowerCase().includes('equipamento') &&
+             (fullText.toLowerCase().includes('anomalia') || fullText.toLowerCase().includes('estado'))) {
+            const trs = Array.from(tbl.getElementsByTagName('w:tr'));
+            for (let i = 1; i < trs.length; i++) {
+              const tcs = Array.from(trs[i].getElementsByTagName('w:tc'));
+              if (tcs.length < 2) continue;
+              const eq = extractParagraphsText(tcs[0]);
+              const desc = extractParagraphsText(tcs[1]);
+              const estado = tcs[3] ? extractParagraphsText(tcs[3]) : 'Pendente';
+
+              let anomalia = desc, acao = '';
+              const pAcao = desc.search(/A[çc][ãa]o\s*:/i);
+              if (pAcao >= 0) {
+                anomalia = desc.substring(0, pAcao).replace(/Anomalia\s*:/i, '').trim();
+                acao = desc.substring(pAcao).replace(/A[çc][ãa]o\s*:/i, '').trim();
+              } else {
+                anomalia = desc.replace(/Anomalia\s*:/i, '').trim();
+              }
+
+              // Procurar imagem na célula 3 (ou na linha)
+              let fotoBase64 = '';
+              const blips = Array.from((tcs[2] || trs[i]).getElementsByTagName('a:blip'));
+              if (blips.length > 0) {
+                const rId = blips[0].getAttribute('r:embed');
+                if (rId && relMap[rId]) {
+                  const imgPath = 'word/' + relMap[rId].replace(/^\/+/, '');
+                  const imgFile = zip.file(imgPath);
+                  if (imgFile) {
+                    const b64 = await imgFile.async('base64');
+                    const ext = imgPath.split('.').pop().toLowerCase();
+                    const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+                    fotoBase64 = `data:${mime};base64,${b64}`;
+                  }
+                }
+              }
+
+              if (eq || anomalia || fotoBase64) {
+                oldAnexoItems.push({ eq, anomalia, acao, estado, foto: fotoBase64 });
+              }
+            }
+            break;
+          }
+        }
+        renderOldReportItems(file.name);
+      } catch (err) {
+        cont.innerHTML = `<p style="color:var(--danger); font-size:13px;">Erro ao ler Word: ${err.message}</p>`;
+      }
+    }
+
+    function extractParagraphsText(tcNode) {
+      const ps = Array.from(tcNode.getElementsByTagName('w:p'));
+      return ps.map(p => p.textContent.trim()).filter(Boolean).join('\n');
+    }
+
+    function renderOldReportItems(fileName) {
+      const cont = document.getElementById('oldReportContainer');
+      if (oldAnexoItems.length === 0) {
+        cont.innerHTML = `<p style="font-size:13px; color:var(--muted);">Nenhuma tabela de Anexo A encontrada em <b>${escapeHtml(fileName)}</b>.</p>`;
+        return;
+      }
+      cont.innerHTML = oldAnexoItems.map((it, idx) => `
+        <div class="old-item">
+          <div>
+            ${it.foto ? `<img src="${it.foto}" alt="Foto Antiga" />` : `<div style="width:110px;height:90px;background:#e2e8f0;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#64748b;">Sem Foto</div>`}
+          </div>
+          <div>
+            <div style="font-weight:700; color:var(--primary); margin-bottom:4px;">${escapeHtml(it.eq || 'Equipamento s/ nome')} <span style="font-size:11px; color:var(--muted);">(${escapeHtml(it.estado)})</span></div>
+            <div style="font-size:12px; margin-bottom:4px;"><b>Anomalia:</b> ${escapeHtml(it.anomalia)}</div>
+            <div style="font-size:12px; margin-bottom:8px;"><b>Ação:</b> ${escapeHtml(it.acao)}</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="btn btn-amber" style="padding:6px 10px; font-size:12px;" onclick="sendOldToAnexo(${idx}, 'Não Resolvido')">Manter Pendente no Anexo A</button>
+              <button class="btn btn-green" style="padding:6px 10px; font-size:12px;" onclick="sendOldToAnexo(${idx}, 'Resolvido')">✅ Já Resolvido</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function sendOldToAnexo(idx, novoEstado) {
+      const it = oldAnexoItems[idx];
+      if (!it) return;
+      // Usa primeira linha vazia ou adiciona nova
+      const emptyRow = anexoRows.find(r => !r.eq && !r.anomalia && !r.foto);
+      if (emptyRow) {
+        emptyRow.eq = it.eq;
+        emptyRow.anomalia = it.anomalia;
+        emptyRow.acao = it.acao;
+        emptyRow.foto = it.foto;
+        emptyRow.estado = novoEstado;
+      } else {
+        anexoRows.push({
+          id: Date.now() + Math.random(),
+          eq: it.eq,
+          anomalia: it.anomalia,
+          acao: it.acao,
+          foto: it.foto,
+          estado: novoEstado
+        });
+      }
+      renderAnexoRows();
+      saveLocalState();
+    }
+
+    function passAllOldToAnexo() {
+      if (!oldAnexoItems.length) return alert('Carrega primeiro o último relatório Word (.docx).');
+      oldAnexoItems.forEach((_, idx) => sendOldToAnexo(idx, 'Não Resolvido'));
+    }
+
+    // =========================================================================
+    // 3. TABELA ANEXO A (FOTOGRAFIAS, DITADO POR VOZ E CÓPIA PARA WORD)
+    // =========================================================================
+    function renderAnexoRows() {
+      const tbody = document.getElementById('anexoBody');
+      tbody.innerHTML = anexoRows.map((row, i) => `
+        <tr>
+          <td>
+            <label class="field-lbl">Equipamento</label>
+            <input type="text" value="${escapeAttr(row.eq)}" placeholder="Ex: UTA 1 / Quadro..." oninput="updateRow(${i}, 'eq', this.value)" />
+            <div class="no-print" style="margin-top:8px;">
+              <button class="btn btn-danger" style="padding:5px 9px; font-size:11px;" onclick="removeAnexoRow(${i})">🗑️ Apagar</button>
+            </div>
+          </td>
+          <td>
+            <div class="desc-label">
+              <span>Anomalia:</span>
+              <button class="btn btn-outline no-print" style="padding:3px 8px; font-size:11px;" onclick="startVoice(${i}, 'anomalia')">🎙️ Ditar</button>
+            </div>
+            <textarea placeholder="Descreve a anomalia..." oninput="updateRow(${i}, 'anomalia', this.value)">${escapeHtml(row.anomalia)}</textarea>
+            <div class="desc-label" style="margin-top:8px;">
+              <span>Ação:</span>
+              <button class="btn btn-outline no-print" style="padding:3px 8px; font-size:11px;" onclick="startVoice(${i}, 'acao')">🎙️ Ditar</button>
+            </div>
+            <textarea placeholder="Descreve a ação recomendada..." oninput="updateRow(${i}, 'acao', this.value)">${escapeHtml(row.acao)}</textarea>
+          </td>
+          <td>
+            <div class="photo-box">
+              ${row.foto
+                ? `<img src="${row.foto}" class="photo-preview" />`
+                : `<div class="photo-preview" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">Sem fotografia</div>`
+              }
+              <div class="no-print" style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
+                <label class="btn btn-green" style="padding:7px 11px; font-size:12px;">
+                  📷 Câmara / Foto
+                  <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handleRowPhoto(event, ${i})" />
+                </label>
+                <label class="btn btn-outline" style="padding:7px 11px; font-size:12px;">
+                  🖼️ Galeria
+                  <input type="file" accept="image/*" style="display:none" onchange="handleRowPhoto(event, ${i})" />
+                </label>
+              </div>
+            </div>
+          </td>
+          <td>
+            <label class="field-lbl">Estado</label>
+            <select onchange="updateRow(${i}, 'estado', this.value)">
+              <option value="Não Resolvido" ${row.estado === 'Não Resolvido' ? 'selected' : ''}>Não Resolvido</option>
+              <option value="Resolvido" ${row.estado === 'Resolvido' ? 'selected' : ''}>Resolvido</option>
+              <option value="Em Curso" ${row.estado === 'Em Curso' ? 'selected' : ''}>Em Curso</option>
+              <option value="Informativo / OK" ${row.estado === 'Informativo / OK' ? 'selected' : ''}>Informativo / OK</option>
+            </select>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateRow(idx, field, val) {
+      if (!anexoRows[idx]) return;
+      anexoRows[idx][field] = val;
+      saveLocalState();
+    }
+
+    function addAnexoRow() {
+      anexoRows.push({ id: Date.now(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' });
+      renderAnexoRows();
+      saveLocalState();
+    }
+
+    function removeAnexoRow(idx) {
+      if (anexoRows.length <= 1) {
+        anexoRows[0] = { id: Date.now(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' };
+      } else {
+        anexoRows.splice(idx, 1);
+      }
+      renderAnexoRows();
+      saveLocalState();
+    }
+
+    function handleRowPhoto(e, idx) {
+      const file = e.target.files[0];
+      if (!file) return;
+      compressImage(file, 900, 0.78, (dataUrl) => {
+        anexoRows[idx].foto = dataUrl;
+        renderAnexoRows();
+        saveLocalState();
+      });
+    }
+
+    function quickCameraRow() {
+      document.getElementById('quickCamInput').click();
+    }
+
+    function handleQuickCam(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      compressImage(file, 900, 0.78, (dataUrl) => {
+        const emptyRow = anexoRows.find(r => !r.foto && !r.eq && !r.anomalia);
+        if (emptyRow) {
+          emptyRow.foto = dataUrl;
+        } else {
+          anexoRows.push({ id: Date.now(), eq: '', anomalia: '', acao: '', foto: dataUrl, estado: 'Não Resolvido' });
+        }
+        renderAnexoRows();
+        saveLocalState();
+        scrollToSec('secAnexoA');
+      });
+    }
+
+    function compressImage(file, maxW, quality, callback) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = function() {
+          let w = img.width, h = img.height;
+          if (w > maxW) { h = Math.round(h * (maxW / w)); w = maxW; }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          callback(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // DITADO POR VOZ PT-PT
+    function startVoice(idx, field) {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) return alert('O teu navegador não suporta ditado por voz direto. Usa o microfone do teclado do telemóvel.');
+      const rec = new SpeechRec();
+      rec.lang = 'pt-PT';
+      rec.interimResults = false;
+      rec.onresult = (e) => {
+        const txt = e.results[0][0].transcript;
+        anexoRows[idx][field] = (anexoRows[idx][field] ? anexoRows[idx][field] + ' ' : '') + txt;
+        renderAnexoRows();
+        saveLocalState();
+      };
+      rec.start();
+    }
+
+    // GUARDAR E ABRIR PACOTE DA VISITA (SINCRONIZAÇÃO TELEMÓVEL <-> PC ONEDRIVE)
+    async function exportVisitPackage() {
+      const storeName = (document.getElementById('manualStoreName').value || 'Visita_LMSI').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const dt = document.getElementById('visitDate').value || new Date().toISOString().slice(0, 10);
+      const payload = {
+        storeName: document.getElementById('manualStoreName').value,
+        visitDate: dt,
+        anexoRows,
+        savedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const fileName = `Visita_${storeName}_${dt}.json`;
+
+      if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'application/json' })] })) {
+        try {
+          await navigator.share({
+            title: fileName,
+            text: 'Pacote de Visita Técnica LMSI (Anexo A com Fotos)',
+            files: [new File([blob], fileName, { type: 'application/json' })]
+          });
+          return;
+        } catch (_) {}
+      }
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName;
+      a.click();
+    }
+
+    function importVisitPackage(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const data = JSON.parse(evt.target.result);
+          if (data.storeName) document.getElementById('manualStoreName').value = data.storeName;
+          if (data.visitDate) document.getElementById('visitDate').value = data.visitDate;
+          if (Array.isArray(data.anexoRows)) {
+            anexoRows = data.anexoRows;
+            renderAnexoRows();
+          }
+          saveLocalState();
+          alert('Visita carregada com sucesso! Podes agora clicar em "Copiar Anexo A p/ Word".');
+        } catch (err) {
+          alert('Ficheiro de visita inválido: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // COPIAR TABELA FORMATADA DIRETO PARA O MICROSOFT WORD
+    async function copyTableForWord() {
+      let html = `
+        <table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse; width:100%; font-family:Calibri, Arial, sans-serif; font-size:11pt;">
+          <thead>
+            <tr style="background-color:#7F7F7F; color:#FFFFFF; font-weight:bold; text-align:center;">
+              <th style="width:18%;">Equipamento</th>
+              <th style="width:38%;">Descrição</th>
+              <th style="width:28%;">Foto</th>
+              <th style="width:16%;">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      anexoRows.forEach(r => {
+        if (!r.eq && !r.anomalia && !r.acao && !r.foto) return;
+        html += `
+          <tr>
+            <td style="vertical-align:top;">${escapeHtml(r.eq)}</td>
+            <td style="vertical-align:top;">
+              <b>Anomalia:</b><br/>${escapeHtml(r.anomalia).replace(/\n/g, '<br/>')}<br/><br/>
+              <b>Ação:</b><br/>${escapeHtml(r.acao).replace(/\n/g, '<br/>')}
+            </td>
+            <td style="text-align:center; vertical-align:middle;">
+              ${r.foto ? `<img src="${r.foto}" width="190" style="max-width:190px; height:auto;" />` : ''}
+            </td>
+            <td style="text-align:center; vertical-align:middle;">${escapeHtml(r.estado)}</td>
+          </tr>
+        `;
+      });
+      html += `</tbody></table>`;
+
+      try {
+        const blobHtml = new Blob([html], { type: 'text/html' });
+        const blobText = new Blob([html.replace(/<[^>]+>/g, ' ')], { type: 'text/plain' });
+        await navigator.clipboard.write([new ClipboardItem({ 'text/html': blobHtml, 'text/plain': blobText })]);
+        alert('Tabela do Anexo A copiada! Abre o teu relatório Word e faz Ctrl + V (Colar).');
+      } catch (err) {
+        alert('Não foi possível copiar automaticamente: ' + err.message);
+      }
+    }
+
+    function saveLocalState() {
+      try {
+        localStorage.setItem('lmsi_visita_state_v2', JSON.stringify({
+          storeName: document.getElementById('manualStoreName').value,
+          visitDate: document.getElementById('visitDate').value,
+          anexoRows
+        }));
+      } catch (_) {}
+    }
+
+    function loadLocalState() {
+      try {
+        const raw = localStorage.getItem('lmsi_visita_state_v2');
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (data.storeName) document.getElementById('manualStoreName').value = data.storeName;
+        if (data.visitDate) document.getElementById('visitDate').value = data.visitDate;
+        if (Array.isArray(data.anexoRows) && data.anexoRows.length) anexoRows = data.anexoRows;
+      } catch (_) {}
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function escapeAttr(s) {
+      return escapeHtml(s).replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
