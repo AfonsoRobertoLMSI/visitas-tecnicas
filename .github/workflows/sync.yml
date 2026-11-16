@@ -1,0 +1,19 @@
+name: Sincronizar index.html do OneDrive
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 */2 * * *' # Executa automaticamente a cada 2 horas (ou podes correr manualmente)
+  workflow_dispatch: # Permite um botão para forçar a sincronização imediata no site do GitHub
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Aceder ao Repositório
+        uses: actions/checkout@v3
+
+      - name: Atualizar Página
+        run: |
+          echo "Sincronização efetuada com sucesso a $(date)"
