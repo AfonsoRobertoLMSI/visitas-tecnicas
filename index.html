@@ -428,26 +428,29 @@
 
       if (!Array.isArray(tempList) || tempList.length === 0) return;
 
-      tempList.forEach(item => {
-        if (!item || !item.foto) return;
-        const alreadyExists = anexoRows.some(r => r.foto === item.foto);
-        if (!alreadyExists) {
-          const emptyRow = anexoRows.find(r => !r.foto && !r.eq && !r.anomalia);
-          if (emptyRow) {
-            emptyRow.eq = item.nome || '';
-            emptyRow.foto = item.foto;
-          } else {
-            anexoRows.push({
-              id: Date.now() + Math.random(),
-              eq: item.nome || '',
-              anomalia: '',
-              acao: '',
-              foto: item.foto,
-              estado: 'Não Resolvido'
-            });
-          }
+      const novosItens = tempList.map(item => ({
+        id: Date.now() + Math.random(),
+        eq: item.eq || item.nome || '',
+        anomalia: item.anomalia || '',
+        acao: item.acao || '',
+        foto: item.foto || '',
+        estado: item.estado || 'Não Resolvido'
+      })).filter(it => it.eq || it.anomalia || it.acao || it.foto);
+
+      if (novosItens.length > 0) {
+        const jaTemDadosManuais = anexoRows.some(r => r.eq || r.anomalia || r.acao || r.foto);
+        if (!jaTemDadosManuais) {
+          anexoRows = novosItens;
+        } else {
+          novosItens.forEach(ni => {
+            const duplicado = anexoRows.some(r =>
+              (ni.foto && r.foto === ni.foto) ||
+              (!ni.foto && r.eq === ni.eq && r.anomalia === ni.anomalia)
+            );
+            if (!duplicado) anexoRows.push(ni);
+          });
         }
-      });
+      }
     }
 
     function nextVisitInstallation() {
