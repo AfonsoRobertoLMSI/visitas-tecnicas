@@ -184,17 +184,16 @@
       <span class="badge-sync" id="syncStatus">Pronto (Offline / Local)</span>
     </div>
     <div class="toolbar">
-      <button class="btn btn-green" onclick="document.getElementById('excelInput').click()">📊 1. Carregar Excel / Dados (MC v2)</button>
-      <input type="file" id="excelInput" accept=".xlsx,.xlsm,.xls,.csv,.json,.log,.txt" style="display:none" onchange="handleExcelUpload(event)" />
+      <button class="btn btn-green" onclick="document.getElementById('excelInput').click()">📊 1. Carregar Dados (.txt / Excel)</button>
+      <input type="file" id="excelInput" accept=".txt,.log,.json,.xlsx,.xlsm,.xls,.csv" style="display:none" onchange="handleExcelUpload(event)" />
 
       <button class="btn btn-blue" onclick="document.getElementById('wordInput').click()">📄 2. Último Relatório (.docx)</button>
       <input type="file" id="wordInput" accept=".docx,.docm" style="display:none" onchange="handleWordUpload(event)" />
 
       <button class="btn btn-amber" onclick="exportVisitPackage()">📤 Guardar Visita p/ OneDrive</button>
       <button class="btn btn-purple" onclick="document.getElementById('pkgInput').click()">📥 Abrir Visita do Telemóvel</button>
-      <input type="file" id="pkgInput" accept=".json" style="display:none" onchange="importVisitPackage(event)" />
+      <input type="file" id="pkgInput" accept=".json,.txt" style="display:none" onchange="importVisitPackage(event)" />
 
-      <button class="btn btn-outline" onclick="carregarDadosGitHubEmTempoReal(true)">🔄 Atualizar Dados</button>
       <button class="btn btn-outline" onclick="copyTableForWord()">📋 Copiar Anexo A p/ Word</button>
     </div>
   </header>
@@ -205,7 +204,7 @@
         <div>
           <label class="field-lbl">Edifício / Instalação (Carregado do Excel Melhoria Contínua v2)</label>
           <select id="storeSelect" onchange="onStoreChange()">
-            <option value="">-- Carrega o Excel (MC v2) ou escreve manualmente abaixo --</option>
+            <option value="">-- Carrega o ficheiro de dados (.txt) ou Excel --</option>
           </select>
         </div>
         <div>
@@ -214,7 +213,7 @@
         </div>
       </div>
       <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-        <input type="text" id="manualStoreName" placeholder="Nome do Edifício (se ainda não carregaste o Excel)" oninput="saveLocalState()" style="flex:1;" />
+        <input type="text" id="manualStoreName" placeholder="Nome do Edifício (se ainda não carregaste os dados)" oninput="saveLocalState()" style="flex:1;" />
       </div>
     </div>
 
@@ -225,8 +224,8 @@
       </div>
       <div id="needsContainer" class="needs-grid">
         <div class="need-pill ok">
-          <strong>Sem Excel carregado</strong>
-          Toca no botão verde <b>1. Carregar Excel (MC v2)</b> ou em <b>Atualizar Dados</b> para ver automaticamente CE, PMP, RM/RC, QAI/ASA, Radão, Legionella e Deteção de Fugas desta instalação.
+          <strong>Sem dados carregados</strong>
+          Toca no botão verde <b>1. Carregar Dados (.txt / Excel)</b> para ver automaticamente CE, PMP, RM/RC, QAI/ASA, Radão e Deteção de Fugas desta instalação.
         </div>
       </div>
     </div>
@@ -286,43 +285,7 @@
       { id: Date.now() + 3, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }
     ];
 
-    function parseJsonSeguro(textoJson) {
-      const limpo = String(textoJson || '').replace(/[\u0000-\u001F]+/g, ' ');
-      return JSON.parse(limpo);
-    }
-
-    async function carregarDadosGitHubEmTempoReal(avisarSeVazio = false) {
-      const statusEl = document.getElementById('syncStatus');
-      try {
-        const url = 'dados_lmsi.js?t=' + Date.now();
-        const resp = await fetch(url, { cache: 'no-store' });
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-
-        const codigoJs = await resp.text();
-        const match = codigoJs.match(/window\.LMSI_AUTO_DATA\s*=\s*(\{[\s\S]*\})\s*;?\s*$/);
-        if (!match || !match[1]) throw new Error('Formato de dados_lmsi.js inválido');
-
-        const parsed = parseJsonSeguro(match[1]);
-        if (Array.isArray(parsed.storesData) && parsed.storesData.length > 0) {
-          storesData = parsed.storesData;
-          localStorage.setItem('lmsi_cached_stores', JSON.stringify(storesData));
-          populateStoreDropdown('GitHub Sync');
-          if (statusEl) statusEl.textContent = `Online: ${storesData.length} edifícios`;
-          return true;
-        }
-        if (avisarSeVazio) alert('O ficheiro dados_lmsi.js não contém edifícios.');
-      } catch (err) {
-        if (statusEl && storesData.length > 0) {
-          statusEl.textContent = `Cache: ${storesData.length} edifícios`;
-        }
-        if (avisarSeVazio) {
-          alert('Ainda não foi possível obter a versão mais recente do GitHub: ' + err.message);
-        }
-      }
-      return false;
-    }
-
-    window.addEventListener('DOMContentLoaded', async () => {
+    window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('visitDate').valueAsDate = new Date();
       checkPinLock();
       loadLocalState();
@@ -330,10 +293,6 @@
         populateStoreDropdown('Memória Local');
       }
       renderAnexoRows();
-
-      if (location.protocol.startsWith('http')) {
-        await carregarDadosGitHubEmTempoReal(false);
-      }
     });
 
     function checkPinLock() {
@@ -369,14 +328,19 @@
       return (weird / str.length) > 0.15;
     }
 
+    function parseJsonSeguro(textoJson) {
+      const limpo = String(textoJson || '').replace(/[\u0000-\u001F]+/g, ' ');
+      return JSON.parse(limpo);
+    }
+
     function handleExcelUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
 
       const lower = file.name.toLowerCase();
-      if (lower.endsWith('.json') || lower.endsWith('.log') || lower.endsWith('.txt')) {
-        const rJson = new FileReader();
-        rJson.onload = (ev) => {
+      if (lower.endsWith('.txt') || lower.endsWith('.log') || lower.endsWith('.json')) {
+        const rText = new FileReader();
+        rText.onload = (ev) => {
           try {
             const rawTxt = String(ev.target.result || '');
             if (rawTxt.startsWith('MSMAMARPC')) {
@@ -390,11 +354,12 @@
               localStorage.setItem('lmsi_cached_stores', JSON.stringify(storesData));
               return;
             }
+            alert('O ficheiro não contém a estrutura "storesData".');
           } catch (err) {
-            alert('Erro ao ler dados: ' + err.message);
+            alert('Erro ao ler ficheiro de dados: ' + err.message);
           }
         };
-        rJson.readAsText(file);
+        rText.readAsText(file);
         return;
       }
 
@@ -428,12 +393,12 @@
       const cont = document.getElementById('needsContainer');
       cont.innerHTML = `
         <div class="need-pill warn" style="grid-column: 1 / -1; font-size:13.5px; line-height:1.5;">
-          <strong>🔒 Ficheiro Protegido por Rótulo de Confidencialidade da Empresa (${escapeHtml(fileName)})</strong>
-          No telemóvel, a app OneDrive aplica encriptação Microsoft Purview/Intune aos ficheiros lidos diretamente de lá (como <code>MSMAMARPC</code>).<br/><br/>
-          Com a sincronização automática via <code>dados_lmsi.js</code>, os edifícios carregam sozinhos ao abrir a página sem precisar de escolher ficheiros encriptados do OneDrive.
+          <strong>🔒 Ficheiro Bloqueado ou Encriptado (${escapeHtml(fileName)})</strong>
+          A aplicação OneDrive no telemóvel aplicou proteção empresarial (<code>MSMAMARPC</code>) a este ficheiro.<br/><br/>
+          Verifica se o ficheiro <code>Dados_Visitas_Mobile.txt</code> foi gerado na pasta do OneDrive ao gravar o Excel e se a política móvel permite abrir ficheiros <code>.txt</code> no navegador.
         </div>
       `;
-      alert('Atenção: O ficheiro ' + fileName + ' veio protegido pela empresa (MSMAMARPC).');
+      alert('Atenção: O ficheiro ' + fileName + ' veio bloqueado/encriptado pela proteção do OneDrive (MSMAMARPC).');
     }
 
     function parseExcelRows(rows, fileName) {
@@ -475,7 +440,7 @@
         opt.textContent = `${st.edif} (${st.emp || 'LMSI'}) — ${st.needs.length} necessidade(s)`;
         sel.appendChild(opt);
       });
-      document.getElementById('syncStatus').textContent = `Excel: ${storesData.length} edifícios`;
+      document.getElementById('syncStatus').textContent = `Dados: ${storesData.length} edifícios`;
       if (storesData.length > 0) {
         sel.value = 0;
         onStoreChange();
