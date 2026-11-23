@@ -286,6 +286,11 @@
       { id: Date.now() + 3, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }
     ];
 
+    function parseJsonSeguro(textoJson) {
+      const limpo = String(textoJson || '').replace(/[\u0000-\u001F]+/g, ' ');
+      return JSON.parse(limpo);
+    }
+
     async function carregarDadosGitHubEmTempoReal(avisarSeVazio = false) {
       const statusEl = document.getElementById('syncStatus');
       try {
@@ -297,7 +302,7 @@
         const match = codigoJs.match(/window\.LMSI_AUTO_DATA\s*=\s*(\{[\s\S]*\})\s*;?\s*$/);
         if (!match || !match[1]) throw new Error('Formato de dados_lmsi.js inválido');
 
-        const parsed = JSON.parse(match[1]);
+        const parsed = parseJsonSeguro(match[1]);
         if (Array.isArray(parsed.storesData) && parsed.storesData.length > 0) {
           storesData = parsed.storesData;
           localStorage.setItem('lmsi_cached_stores', JSON.stringify(storesData));
@@ -378,7 +383,7 @@
               showEncryptionHelpModal(file.name);
               return;
             }
-            const parsed = JSON.parse(rawTxt);
+            const parsed = parseJsonSeguro(rawTxt);
             if (Array.isArray(parsed.storesData)) {
               storesData = parsed.storesData;
               populateStoreDropdown(file.name);
@@ -867,7 +872,7 @@
       const reader = new FileReader();
       reader.onload = (evt) => {
         try {
-          const data = JSON.parse(evt.target.result);
+          const data = parseJsonSeguro(evt.target.result);
           if (data.storeName) document.getElementById('manualStoreName').value = data.storeName;
           if (data.visitDate) document.getElementById('visitDate').value = data.visitDate;
           if (Array.isArray(data.anexoRows)) {
@@ -938,14 +943,14 @@
       try {
         const cachedStores = localStorage.getItem('lmsi_cached_stores');
         if (cachedStores) {
-          const parsed = JSON.parse(cachedStores);
+          const parsed = parseJsonSeguro(cachedStores);
           if (Array.isArray(parsed) && parsed.length > 0 && !isGarbageText(parsed[0].edif)) {
             storesData = parsed;
           }
         }
         const raw = localStorage.getItem('lmsi_visita_state_v2');
         if (!raw) return;
-        const data = JSON.parse(raw);
+        const data = parseJsonSeguro(raw);
         if (data.storeName && !isGarbageText(data.storeName)) {
           document.getElementById('manualStoreName').value = data.storeName;
         }
