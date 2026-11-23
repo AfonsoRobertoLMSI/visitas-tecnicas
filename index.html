@@ -187,8 +187,8 @@
       <button class="btn btn-green" onclick="document.getElementById('excelInput').click()">📊 1. Carregar Dados (.txt / Excel)</button>
       <input type="file" id="excelInput" accept=".txt,.log,.json,.xlsx,.xlsm,.xls,.csv" style="display:none" onchange="handleExcelUpload(event)" />
 
-      <button class="btn btn-blue" onclick="document.getElementById('wordInput').click()">📄 2. Último Relatório (.docx)</button>
-      <input type="file" id="wordInput" accept=".docx,.docm" style="display:none" onchange="handleWordUpload(event)" />
+      <button class="btn btn-blue" onclick="document.getElementById('wordInput').click()">📄 2. Último Relatório (.txt / .docx)</button>
+      <input type="file" id="wordInput" accept=".txt,.log,.json,.docx,.docm" style="display:none" onchange="handleWordUpload(event)" />
 
       <button class="btn btn-amber" onclick="exportVisitPackage()">📤 Guardar Visita p/ OneDrive</button>
       <button class="btn btn-purple" onclick="document.getElementById('pkgInput').click()">📥 Abrir Visita do Telemóvel</button>
@@ -232,12 +232,12 @@
 
     <div class="card" id="secOldWord">
       <div class="card-title">
-        <span>2. Problemas do Último Relatório Word (.docx)</span>
+        <span>2. Problemas do Último Relatório (Anexo A Anterior)</span>
         <button class="btn btn-outline no-print" onclick="passAllOldToAnexo()">Passar Pendentes p/ Anexo A</button>
       </div>
       <div id="oldReportContainer">
         <p style="font-size:13px; color:var(--muted); margin:0;">
-          Toca no botão azul <b>2. Último Relatório (.docx)</b> para extrair automaticamente os problemas e fotografias antigas do Anexo A anterior.
+          Toca no botão azul <b>2. Último Relatório (.txt / .docx)</b> para carregar os problemas e fotografias antigas do Anexo A anterior.
         </p>
       </div>
     </div>
@@ -333,6 +333,9 @@
       return JSON.parse(limpo);
     }
 
+    // =========================================================================
+    // 1. LEITURA DE DADOS DO EXCEL (.txt / .log / .json / .xlsx / .xlsm)
+    // =========================================================================
     function handleExcelUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -354,7 +357,7 @@
               localStorage.setItem('lmsi_cached_stores', JSON.stringify(storesData));
               return;
             }
-            alert('O ficheiro não contém a estrutura "storesData".');
+            alert('O ficheiro não contém a lista de edifícios ("storesData").');
           } catch (err) {
             alert('Erro ao ler ficheiro de dados: ' + err.message);
           }
@@ -395,10 +398,10 @@
         <div class="need-pill warn" style="grid-column: 1 / -1; font-size:13.5px; line-height:1.5;">
           <strong>🔒 Ficheiro Bloqueado ou Encriptado (${escapeHtml(fileName)})</strong>
           A aplicação OneDrive no telemóvel aplicou proteção empresarial (<code>MSMAMARPC</code>) a este ficheiro.<br/><br/>
-          Verifica se o ficheiro <code>Dados_Visitas_Mobile.txt</code> foi gerado na pasta do OneDrive ao gravar o Excel e se a política móvel permite abrir ficheiros <code>.txt</code> no navegador.
+          Utiliza os ficheiros leves <code>.txt</code> gerados pelo Excel para carregar os dados sem bloqueios.
         </div>
       `;
-      alert('Atenção: O ficheiro ' + fileName + ' veio bloqueado/encriptado pela proteção do OneDrive (MSMAMARPC).');
+      alert('Atenção: O ficheiro ' + fileName + ' veio bloqueado pela proteção do OneDrive (MSMAMARPC).');
     }
 
     function parseExcelRows(rows, fileName) {
@@ -530,12 +533,47 @@
       saveLocalState();
     }
 
+    // =========================================================================
+    // 2. LEITURA DO ÚLTIMO RELATÓRIO (.txt GERADO PELO EXCEL OU .docx)
+    // =========================================================================
     async function handleWordUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
       const cont = document.getElementById('oldReportContainer');
-      cont.innerHTML = '<p style="font-size:13px;">A extrair tabela e fotografias do Anexo A do Word...</p>';
+      const lower = file.name.toLowerCase();
 
+      // Caso A: Ficheiro .txt / .log / .json gerado pela macro ExportarAnexoAParaTXT_Leve
+      if (lower.endsWith('.txt') || lower.endsWith('.log') || lower.endsWith('.json')) {
+        cont.innerHTML = '<p style="font-size:13px;">A carregar Anexo A anterior (.txt)...</p>';
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const rawTxt = String(evt.target.result || '');
+            if (rawTxt.startsWith('MSMAMARPC')) {
+              cont.innerHTML = `<p style="color:var(--danger); font-size:13px;">Ficheiro protegido pela empresa (MSMAMARPC).</p>`;
+              return;
+            }
+            const parsed = parseJsonSeguro(rawTxt);
+            if (Array.isArray(parsed.oldAnexoItems)) {
+              oldAnexoItems = parsed.oldAnexoItems;
+              if (parsed.storeName && !document.getElementById('manualStoreName').value) {
+                document.getElementById('manualStoreName').value = parsed.storeName;
+                saveLocalState();
+              }
+              renderOldReportItems(file.name);
+              return;
+            }
+            cont.innerHTML = `<p style="color:var(--danger); font-size:13px;">O ficheiro selecionado não contém dados do Anexo A anterior.</p>`;
+          } catch (err) {
+            cont.innerHTML = `<p style="color:var(--danger); font-size:13px;">Erro ao ler ficheiro .txt do Anexo A: ${err.message}</p>`;
+          }
+        };
+        reader.readAsText(file);
+        return;
+      }
+
+      // Caso B: Documento Word (.docx)
+      cont.innerHTML = '<p style="font-size:13px;">A extrair tabela e fotografias do Anexo A do Word...</p>';
       try {
         const zip = await JSZip.loadAsync(file);
         const docXml = await zip.file('word/document.xml').async('string');
@@ -602,7 +640,7 @@
         }
         renderOldReportItems(file.name);
       } catch (err) {
-        cont.innerHTML = `<p style="color:var(--danger); font-size:13px;">Erro ao ler Word: ${err.message}</p>`;
+        cont.innerHTML = `<p style="color:var(--danger); font-size:13px;">Erro ao ler Word (usa o ficheiro .txt gerado pelo Excel se estiver bloqueado no telemóvel): ${err.message}</p>`;
       }
     }
 
@@ -614,7 +652,7 @@
     function renderOldReportItems(fileName) {
       const cont = document.getElementById('oldReportContainer');
       if (oldAnexoItems.length === 0) {
-        cont.innerHTML = `<p style="font-size:13px; color:var(--muted);">Nenhuma tabela de Anexo A encontrada em <b>${escapeHtml(fileName)}</b>.</p>`;
+        cont.innerHTML = `<p style="font-size:13px; color:var(--muted);">Nenhum item de Anexo A encontrado em <b>${escapeHtml(fileName)}</b>.</p>`;
         return;
       }
       cont.innerHTML = oldAnexoItems.map((it, idx) => `
@@ -660,10 +698,13 @@
     }
 
     function passAllOldToAnexo() {
-      if (!oldAnexoItems.length) return alert('Carrega primeiro o último relatório Word (.docx).');
+      if (!oldAnexoItems.length) return alert('Carrega primeiro o último relatório (.txt ou .docx).');
       oldAnexoItems.forEach((_, idx) => sendOldToAnexo(idx, 'Não Resolvido'));
     }
 
+    // =========================================================================
+    // 3. TABELA ANEXO A
+    // =========================================================================
     function renderAnexoRows() {
       const tbody = document.getElementById('anexoBody');
       tbody.innerHTML = anexoRows.map((row, i) => `
