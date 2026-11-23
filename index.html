@@ -345,6 +345,13 @@
         .replace(/[^a-z0-9]/g, '') || 'tecnico';
     }
 
+    function normalizarNomeEdif(s) {
+      return String(s || '')
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+    }
+
     function getStorageKey() {
       return 'lmsi_visita_state_' + slugifyTech(currentTech);
     }
@@ -352,20 +359,22 @@
     function initTechnicianSession(tech) {
       currentTech = tech;
       const slug = slugifyTech(tech);
+      window.LMSI_DATA_B64 = null;
+      window.LMSI_FOTOS_TEMP = null;
       document.getElementById('techBadge').textContent = `Técnico: ${tech}`;
       document.getElementById('syncStatus').textContent = `A carregar ronda (${slug})...`;
 
       visitsByStore = {};
       anexoRows = [{ id: Date.now() + 1, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }];
-      loadLocalState();
       renderAnexoRows();
       updateRondaCounter();
 
       loadScriptAsync(`dados_lmsi_${slug}.js?t=${Date.now()}`, () => {
-        loadEmbeddedJsData();
         loadScriptAsync(`fotos_ronda_${slug}.js?t=${Date.now()}`, () => {
+          loadEmbeddedJsData();
           applyTempPhotosForCurrentStore();
           renderAnexoRows();
+          saveLocalState();
         });
       });
     }
@@ -405,7 +414,18 @@
     function applyTempPhotosForCurrentStore() {
       const storeName = (document.getElementById('manualStoreName').value || '').trim();
       if (!window.LMSI_FOTOS_TEMP || !storeName) return;
-      const tempList = window.LMSI_FOTOS_TEMP[storeName];
+
+      let tempList = window.LMSI_FOTOS_TEMP[storeName];
+      if (!Array.isArray(tempList)) {
+        const alvo = normalizarNomeEdif(storeName);
+        for (const chave of Object.keys(window.LMSI_FOTOS_TEMP)) {
+          if (normalizarNomeEdif(chave) === alvo && Array.isArray(window.LMSI_FOTOS_TEMP[chave])) {
+            tempList = window.LMSI_FOTOS_TEMP[chave];
+            break;
+          }
+        }
+      }
+
       if (!Array.isArray(tempList) || tempList.length === 0) return;
 
       tempList.forEach(item => {
