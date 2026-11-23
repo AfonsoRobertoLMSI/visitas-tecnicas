@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Visitas Técnicas LMSI - Melhoria Contínua v2</title>
-  <!-- Carrega automaticamente os dados codificados gerados pelo Excel -->
-  <script src="dados_lmsi.js"></script>
-  <!-- Bibliotecas de apoio (Excel local e Word .docx) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <style>
@@ -32,22 +29,21 @@
       color: var(--text);
       padding-bottom: 84px;
     }
-    /* ECRÃ DE BLOQUEIO POR PIN */
     #pinOverlay {
       position: fixed; inset: 0; background: linear-gradient(135deg, #143554, #1f4e79);
       z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;
     }
     .pin-card {
-      background: #fff; border-radius: 16px; max-width: 380px; width: 100%;
-      padding: 28px 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      background: #fff; border-radius: 16px; max-width: 390px; width: 100%;
+      padding: 26px 22px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     }
     .pin-card h2 { margin: 0 0 8px; color: var(--primary); font-size: 20px; }
-    .pin-card p { margin: 0 0 18px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .pin-card p { margin: 0 0 16px; color: var(--muted); font-size: 13px; line-height: 1.4; }
     .pin-input {
-      width: 100%; padding: 14px; font-size: 18px; text-align: center; letter-spacing: 3px;
-      border: 2px solid var(--border); border-radius: 10px; margin-bottom: 14px; font-weight: 700;
+      width: 100%; padding: 13px; font-size: 16px; text-align: center;
+      border: 2px solid var(--border); border-radius: 10px; margin-bottom: 12px; font-weight: 700;
+      background: #fff;
     }
-    /* CABEÇALHO */
     header {
       background: var(--primary); color: #fff; padding: 12px 16px;
       position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -73,6 +69,7 @@
     .btn-blue { background: #2b579a; color: #fff; }
     .btn-amber { background: #e67e22; color: #fff; }
     .btn-purple { background: #6f42c1; color: #fff; }
+    .btn-teal { background: #2a7b88; color: #fff; }
     .btn-outline { background: #fff; color: var(--primary); border: 1px solid var(--border); }
     .btn-danger { background: var(--danger); color: #fff; }
     .container { max-width: 1180px; margin: 14px auto; padding: 0 12px; }
@@ -85,9 +82,9 @@
       display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
     }
     .selector-bar {
-      display: grid; grid-template-columns: 1fr 150px; gap: 10px; align-items: end;
+      display: grid; grid-template-columns: 1fr 150px auto; gap: 10px; align-items: end;
     }
-    @media (max-width: 640px) {
+    @media (max-width: 720px) {
       .selector-bar { grid-template-columns: 1fr; }
     }
     label.field-lbl { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
@@ -96,7 +93,6 @@
       font-size: 14px; font-family: inherit; background: #fff;
     }
     textarea { resize: vertical; min-height: 62px; }
-    /* GRELHA DE NECESSIDADES */
     .needs-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px;
     }
@@ -106,7 +102,6 @@
     }
     .need-pill.ok { border-left-color: var(--success); background: #f0fdf4; }
     .need-pill strong { display: block; color: var(--text); margin-bottom: 3px; }
-    /* ITENS DO RELATÓRIO ANTERIOR */
     .old-item {
       border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px;
       display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: start; background: #fafbfc;
@@ -115,7 +110,6 @@
       width: 110px; height: 90px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border);
       background: #eee;
     }
-    /* TABELA ANEXO A */
     .anexo-header {
       color: var(--teal); font-size: 18px; font-weight: 800; margin: 4px 0 12px;
     }
@@ -137,7 +131,6 @@
       width: 180px; max-width: 100%; height: 135px; object-fit: contain;
       border: 1px dashed #94a3b8; border-radius: 8px; background: #f8fafc;
     }
-    /* VISTA MOBILE */
     @media (max-width: 768px) {
       table.anexo-table thead { display: none; }
       table.anexo-table, table.anexo-table tbody, table.anexo-table tr, table.anexo-table td {
@@ -150,7 +143,6 @@
       table.anexo-table td { border: none; border-bottom: 1px solid #edf2f7; }
       .photo-preview { width: 100%; height: 190px; }
     }
-    /* BARRA INFERIOR MOBILE */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
       background: #fff; border-top: 1px solid var(--border);
@@ -176,22 +168,34 @@
 </head>
 <body>
 
-  <!-- ECRÃ DE PIN DA EQUIPA -->
-  <div id="pinOverlay" style="display:none;">
+  <div id="pinOverlay" style="display:flex;">
     <div class="pin-card">
       <h2>🔒 Visitas Técnicas LMSI</h2>
-      <p>Introduz o PIN da equipa para desbloquear a aplicação neste dispositivo (predefinido: <strong>LMSI</strong> ou <strong>1234</strong>).</p>
+      <p>Seleciona o teu nome e introduz o PIN da equipa (<strong>LMSI</strong> ou <strong>1234</strong>).</p>
+      <select id="techSelect" class="pin-input" style="letter-spacing:0; font-size:15px;">
+        <option value="">-- Seleciona o Técnico --</option>
+        <option value="Bernardo Nunes">Bernardo Nunes</option>
+        <option value="Bernardo Vieira">Bernardo Vieira</option>
+        <option value="João Simões">João Simões</option>
+        <option value="Valter Palma">Valter Palma</option>
+        <option value="Afonso Roberto">Afonso Roberto</option>
+        <option value="António Rato">António Rato</option>
+      </select>
       <input type="password" id="pinInput" class="pin-input" placeholder="PIN da Equipa" />
-      <button class="btn btn-blue" style="width:100%; padding:13px;" onclick="unlockApp()">Entrar na Aplicação</button>
+      <button class="btn btn-blue" style="width:100%; padding:13px;" onclick="unlockApp()">Carregar a Minha Ronda</button>
     </div>
   </div>
 
   <header>
     <div class="header-top">
       <div class="brand">
-        <span>🏢 Visitas Técnicas — Anexo A & MC v2</span>
+        <span>🏢 Visitas LMSI</span>
+        <span class="badge-sync" id="techBadge">Técnico: —</span>
       </div>
-      <span class="badge-sync" id="syncStatus">A verificar base...</span>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span class="badge-sync" id="syncStatus">A aguardar técnico...</span>
+        <button class="btn btn-outline" style="padding:4px 9px; font-size:11px;" onclick="switchTechnician()">Trocar Técnico</button>
+      </div>
     </div>
     <div class="toolbar">
       <button class="btn btn-green" onclick="document.getElementById('excelInput').click()">📊 1. Excel / Dados Local</button>
@@ -200,8 +204,8 @@
       <button class="btn btn-blue" onclick="document.getElementById('wordInput').click()">📄 2. Último Relatório (.docx)</button>
       <input type="file" id="wordInput" accept=".docx,.docm" style="display:none" onchange="handleWordUpload(event)" />
 
-      <button class="btn btn-amber" onclick="exportVisitPackage()">📤 Guardar JSON Anexo A</button>
-      <button class="btn btn-purple" onclick="document.getElementById('pkgInput').click()">📥 Abrir JSON Anexo A</button>
+      <button class="btn btn-amber" onclick="exportVisitPackage()">📤 Guardar JSON Visita</button>
+      <button class="btn btn-purple" onclick="document.getElementById('pkgInput').click()">📥 Abrir JSON Visita</button>
       <input type="file" id="pkgInput" accept=".json" style="display:none" onchange="importVisitPackage(event)" />
 
       <button class="btn btn-outline" onclick="copyTableForWord()">📋 Copiar Anexo A p/ Word</button>
@@ -209,11 +213,10 @@
   </header>
 
   <div class="container">
-    <!-- BARRA DE SELEÇÃO DO EDIFÍCIO -->
     <div class="card">
       <div class="selector-bar">
         <div>
-          <label class="field-lbl">Edifício / Instalação (Base LMSI - Melhoria Contínua v2)</label>
+          <label class="field-lbl">Edifício / Instalação da Ronda</label>
           <select id="storeSelect" onchange="onStoreChange()">
             <option value="">-- Seleciona o Edifício --</option>
           </select>
@@ -222,13 +225,16 @@
           <label class="field-lbl">Data da Visita</label>
           <input type="date" id="visitDate" onchange="saveLocalState()" />
         </div>
+        <div>
+          <button class="btn btn-teal" style="width:100%; padding:10px 14px;" onclick="nextVisitInstallation()">⏭️ Próxima Visita</button>
+        </div>
       </div>
       <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-        <input type="text" id="manualStoreName" placeholder="Nome do Edifício (preenchido automaticamente ao escolher acima)" oninput="saveLocalState()" style="flex:1;" />
+        <input type="text" id="manualStoreName" placeholder="Nome do Edifício" oninput="saveLocalState()" style="flex:1;" />
+        <span style="font-size:12px; color:var(--muted);" id="rondaCounterLbl">Instalações trabalhadas hoje: 0</span>
       </div>
     </div>
 
-    <!-- SECÇÃO 1: NECESSIDADES DO EXCEL -->
     <div class="card" id="secNeeds">
       <div class="card-title">
         <span>1. Necessidades e Incumprimentos (Excel Melhoria Contínua v2)</span>
@@ -237,12 +243,11 @@
       <div id="needsContainer" class="needs-grid">
         <div class="need-pill ok">
           <strong>A aguardar seleção de edifício</strong>
-          Escolhe um edifício na lista acima para ver automaticamente CE, PMP, RM/RC, QAI/ASA, Radão, Legionella e Deteção de Fugas.
+          Escolhe um edifício na lista acima para ver automaticamente CE, PMP, RM/RC, QAI/ASA, Radão e Deteção de Fugas.
         </div>
       </div>
     </div>
 
-    <!-- SECÇÃO 2: PROBLEMAS DO ÚLTIMO RELATÓRIO WORD -->
     <div class="card" id="secOldWord">
       <div class="card-title">
         <span>2. Problemas do Último Relatório Word (.docx)</span>
@@ -250,12 +255,11 @@
       </div>
       <div id="oldReportContainer">
         <p style="font-size:13px; color:var(--muted); margin:0;">
-          Usa o botão azul <b>2. Último Relatório (.docx)</b> (no PC) para extrair automaticamente os problemas e fotografias antigas do Anexo A anterior.
+          Usa o botão azul <b>2. Último Relatório (.docx)</b> para extrair problemas e fotografias antigas do Anexo A anterior.
         </p>
       </div>
     </div>
 
-    <!-- SECÇÃO 3: ANEXO A - REGISTO FOTOGRÁFICO DA VISITA -->
     <div class="card" id="secAnexoA">
       <div class="card-title">
         <span class="anexo-header">ANEXO A – Registo Fotográfico da Visita</span>
@@ -280,11 +284,9 @@
     </div>
   </div>
 
-  <!-- BOTÃO FLUTUANTE DE CÂMARA RÁPIDA -->
   <button class="fab-camera no-print" onclick="quickCameraRow()">📷 + Foto Rápida</button>
   <input type="file" id="quickCamInput" accept="image/*" capture="environment" style="display:none" onchange="handleQuickCam(event)" />
 
-  <!-- NAVEGAÇÃO INFERIOR MOBILE -->
   <nav class="bottom-nav no-print">
     <button class="nav-tab active" onclick="scrollToSec('secNeeds', this)">⚠️ 1. Necessidades</button>
     <button class="nav-tab" onclick="scrollToSec('secOldWord', this)">⏪ 2. Últ. Relatório</button>
@@ -293,65 +295,171 @@
   </nav>
 
   <script>
+    let currentTech = '';
     let storesData = [];
     let oldAnexoItems = [];
+    let visitsByStore = {};
     let anexoRows = [
-      { id: Date.now() + 1, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' },
-      { id: Date.now() + 2, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' },
-      { id: Date.now() + 3, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }
+      { id: Date.now() + 1, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }
     ];
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('visitDate').valueAsDate = new Date();
-      checkPinLock();
-      loadEmbeddedJsData();
-      loadLocalState();
-      renderAnexoRows();
+      const savedTech = localStorage.getItem('lmsi_tech_name') || '';
+      const pinOk = localStorage.getItem('lmsi_pin_ok') === '1';
+      if (savedTech) document.getElementById('techSelect').value = savedTech;
+
+      if (pinOk && savedTech) {
+        document.getElementById('pinOverlay').style.display = 'none';
+        initTechnicianSession(savedTech);
+      }
     });
 
-    function checkPinLock() {
-      if (location.protocol.startsWith('http') && localStorage.getItem('lmsi_pin_ok') !== '1') {
-        document.getElementById('pinOverlay').style.display = 'flex';
-      }
+    function switchTechnician() {
+      document.getElementById('pinOverlay').style.display = 'flex';
     }
 
     function unlockApp() {
+      const tech = (document.getElementById('techSelect').value || '').trim();
       const val = (document.getElementById('pinInput').value || '').trim().toUpperCase();
-      if (val === 'LMSI' || val === '1234' || val === 'LMSI2026') {
-        localStorage.setItem('lmsi_pin_ok', '1');
-        document.getElementById('pinOverlay').style.display = 'none';
-      } else {
-        alert('PIN incorreto. Usa LMSI ou 1234.');
+      const alreadyAuthed = localStorage.getItem('lmsi_pin_ok') === '1';
+
+      if (!tech) {
+        alert('Seleciona o teu nome na lista de técnicos.');
+        return;
       }
+      if (!alreadyAuthed && val !== 'LMSI' && val !== '1234' && val !== 'LMSI2026') {
+        alert('PIN incorreto. Usa LMSI ou 1234.');
+        return;
+      }
+      localStorage.setItem('lmsi_pin_ok', '1');
+      localStorage.setItem('lmsi_tech_name', tech);
+      document.getElementById('pinOverlay').style.display = 'none';
+      initTechnicianSession(tech);
     }
 
-    // =========================================================================
-    // DESCODIFICAÇÃO AUTOMÁTICA DO FICHEIRO dados_lmsi.js (BASE64 UTF-8)
-    // =========================================================================
+    function slugifyTech(s) {
+      return String(s || 'tecnico')
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '') || 'tecnico';
+    }
+
+    function getStorageKey() {
+      return 'lmsi_visita_state_' + slugifyTech(currentTech);
+    }
+
+    function initTechnicianSession(tech) {
+      currentTech = tech;
+      const slug = slugifyTech(tech);
+      document.getElementById('techBadge').textContent = `Técnico: ${tech}`;
+      document.getElementById('syncStatus').textContent = `A carregar ronda (${slug})...`;
+
+      visitsByStore = {};
+      anexoRows = [{ id: Date.now() + 1, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }];
+      loadLocalState();
+      renderAnexoRows();
+      updateRondaCounter();
+
+      loadScriptAsync(`dados_lmsi_${slug}.js?t=${Date.now()}`, () => {
+        loadEmbeddedJsData();
+        loadScriptAsync(`fotos_ronda_${slug}.js?t=${Date.now()}`, () => {
+          applyTempPhotosForCurrentStore();
+          renderAnexoRows();
+        });
+      });
+    }
+
+    function loadScriptAsync(src, onDone) {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = () => { if (onDone) onDone(); };
+      s.onerror = () => { if (onDone) onDone(); };
+      document.head.appendChild(s);
+    }
+
     function decodeBase64Utf8(b64) {
       const bin = atob(String(b64 || '').replace(/\s+/g, ''));
       const bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) {
-        bytes[i] = bin.charCodeAt(i);
-      }
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
       return new TextDecoder('utf-8').decode(bytes);
     }
 
     function loadEmbeddedJsData() {
       if (!window.LMSI_DATA_B64) {
-        document.getElementById('syncStatus').textContent = 'Sem dados_lmsi.js';
+        document.getElementById('syncStatus').textContent = `Sem ronda preparada p/ ${currentTech}`;
         return;
       }
       try {
         const jsonText = decodeBase64Utf8(window.LMSI_DATA_B64);
         const parsed = JSON.parse(jsonText);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          populateStoresDropdown(parsed, 'Base LMSI');
+          populateStoresDropdown(parsed, `Ronda ${currentTech}`);
         }
       } catch (err) {
-        console.error('Erro ao descodificar dados_lmsi.js:', err);
-        document.getElementById('syncStatus').textContent = 'Erro na base JS';
+        console.error('Erro ao descodificar dados:', err);
+        document.getElementById('syncStatus').textContent = 'Erro nos dados da ronda';
       }
+    }
+
+    function applyTempPhotosForCurrentStore() {
+      const storeName = (document.getElementById('manualStoreName').value || '').trim();
+      if (!window.LMSI_FOTOS_TEMP || !storeName) return;
+      const tempList = window.LMSI_FOTOS_TEMP[storeName];
+      if (!Array.isArray(tempList) || tempList.length === 0) return;
+
+      tempList.forEach(item => {
+        if (!item || !item.foto) return;
+        const alreadyExists = anexoRows.some(r => r.foto === item.foto);
+        if (!alreadyExists) {
+          const emptyRow = anexoRows.find(r => !r.foto && !r.eq && !r.anomalia);
+          if (emptyRow) {
+            emptyRow.eq = item.nome || '';
+            emptyRow.foto = item.foto;
+          } else {
+            anexoRows.push({
+              id: Date.now() + Math.random(),
+              eq: item.nome || '',
+              anomalia: '',
+              acao: '',
+              foto: item.foto,
+              estado: 'Não Resolvido'
+            });
+          }
+        }
+      });
+    }
+
+    function nextVisitInstallation() {
+      saveCurrentStoreDraft();
+      const sel = document.getElementById('storeSelect');
+      if (storesData.length > 0) {
+        const nextIdx = (Number(sel.value) + 1) % storesData.length;
+        sel.value = nextIdx;
+        onStoreChange();
+      } else {
+        document.getElementById('manualStoreName').value = '';
+        anexoRows = [{ id: Date.now(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }];
+        renderAnexoRows();
+        saveLocalState();
+      }
+      updateRondaCounter();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function saveCurrentStoreDraft() {
+      const key = (document.getElementById('manualStoreName').value || '').trim();
+      if (!key) return;
+      visitsByStore[key] = {
+        visitDate: document.getElementById('visitDate').value,
+        anexoRows: JSON.parse(JSON.stringify(anexoRows))
+      };
+      updateRondaCounter();
+    }
+
+    function updateRondaCounter() {
+      const count = Object.keys(visitsByStore).length;
+      document.getElementById('rondaCounterLbl').textContent = `Instalações trabalhadas hoje (${currentTech}): ${count}`;
     }
 
     function populateStoresDropdown(list, sourceLabel) {
@@ -364,7 +472,7 @@
         opt.textContent = `${st.edif} (${st.emp || 'LMSI'}) — ${(st.needs || []).length} necessidade(s)`;
         sel.appendChild(opt);
       });
-      document.getElementById('syncStatus').textContent = `${sourceLabel}: ${storesData.length} edifícios`;
+      document.getElementById('syncStatus').textContent = `${sourceLabel}: ${storesData.length} edifício(s)`;
       if (storesData.length > 0) {
         sel.value = 0;
         onStoreChange();
@@ -378,9 +486,6 @@
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // =========================================================================
-    // LEITURA ALTERNATIVA LOCAL (EXCEL OU JSON)
-    // =========================================================================
     function handleExcelOrJsonUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -513,12 +618,17 @@
           </div>
         `).join('');
       }
+
+      if (visitsByStore[st.edif] && Array.isArray(visitsByStore[st.edif].anexoRows)) {
+        anexoRows = JSON.parse(JSON.stringify(visitsByStore[st.edif].anexoRows));
+      } else {
+        anexoRows = [{ id: Date.now(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }];
+      }
+      applyTempPhotosForCurrentStore();
+      renderAnexoRows();
       saveLocalState();
     }
 
-    // =========================================================================
-    // LEITURA DO ÚLTIMO RELATÓRIO WORD (.docx) COM EXTRAÇÃO DE FOTOS
-    // =========================================================================
     async function handleWordUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -653,9 +763,6 @@
       oldAnexoItems.forEach((_, idx) => sendOldToAnexo(idx, 'Não Resolvido'));
     }
 
-    // =========================================================================
-    // TABELA ANEXO A (FOTOGRAFIAS, DITADO POR VOZ E CÓPIA PARA WORD)
-    // =========================================================================
     function renderAnexoRows() {
       const tbody = document.getElementById('anexoBody');
       tbody.innerHTML = anexoRows.map((row, i) => `
@@ -735,7 +842,7 @@
     function handleRowPhoto(e, idx) {
       const file = e.target.files[0];
       if (!file) return;
-      compressImage(file, 900, 0.78, (dataUrl) => {
+      compressImage(file, 850, 0.72, (dataUrl) => {
         anexoRows[idx].foto = dataUrl;
         renderAnexoRows();
         saveLocalState();
@@ -749,7 +856,7 @@
     function handleQuickCam(e) {
       const file = e.target.files[0];
       if (!file) return;
-      compressImage(file, 900, 0.78, (dataUrl) => {
+      compressImage(file, 850, 0.72, (dataUrl) => {
         const emptyRow = anexoRows.find(r => !r.foto && !r.eq && !r.anomalia);
         if (emptyRow) {
           emptyRow.foto = dataUrl;
@@ -795,55 +902,32 @@
       rec.start();
     }
 
-    // =========================================================================
-    // GUARDAR O JSON DO ANEXO A NA PASTA ESCOLHIDA POR TI
-    // =========================================================================
     async function exportVisitPackage() {
+      saveCurrentStoreDraft();
       const storeName = (document.getElementById('manualStoreName').value || 'Visita_LMSI').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const techSlug = slugifyTech(currentTech);
       const dt = document.getElementById('visitDate').value || new Date().toISOString().slice(0, 10);
       const payload = {
+        technician: currentTech,
         storeName: document.getElementById('manualStoreName').value,
         visitDate: dt,
         anexoRows,
+        allStoresToday: visitsByStore,
         savedAt: new Date().toISOString()
       };
-      const jsonStr = JSON.stringify(payload, null, 2);
-      const fileName = `Visita_${storeName}_${dt}.json`;
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const fileName = `Visita_${storeName}_${techSlug}_${dt}.json`;
 
-      // No PC (Chrome/Edge), abre o diálogo nativo "Guardar Como" para escolheres a pasta exata
-      if (window.showSaveFilePicker) {
-        try {
-          const handle = await window.showSaveFilePicker({
-            suggestedName: fileName,
-            types: [{
-              description: 'Ficheiro JSON do Anexo A',
-              accept: { 'application/json': ['.json'] }
-            }]
-          });
-          const writable = await handle.createWritable();
-          await writable.write(jsonStr);
-          await writable.close();
-          alert('Ficheiro JSON do Anexo A guardado na pasta escolhida!');
-          return;
-        } catch (err) {
-          if (err.name === 'AbortError') return;
-        }
-      }
-
-      // No Telemóvel, usa a folha de partilha nativa para guardares na pasta do OneDrive/Ficheiros que escolheres
-      const blob = new Blob([jsonStr], { type: 'application/json' });
-      const fileObj = new File([blob], fileName, { type: 'application/json' });
-      if (navigator.canShare && navigator.canShare({ files: [fileObj] })) {
+      if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'application/json' })] })) {
         try {
           await navigator.share({
             title: fileName,
-            text: 'Anexo A - Registo Fotográfico LMSI',
-            files: [fileObj]
+            text: `Pacote de Visita Técnica LMSI (${currentTech})`,
+            files: [new File([blob], fileName, { type: 'application/json' })]
           });
           return;
         } catch (_) {}
       }
-
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = fileName;
@@ -863,8 +947,12 @@
             anexoRows = data.anexoRows;
             renderAnexoRows();
           }
+          if (data.allStoresToday && typeof data.allStoresToday === 'object') {
+            visitsByStore = Object.assign({}, visitsByStore, data.allStoresToday);
+            updateRondaCounter();
+          }
           saveLocalState();
-          alert('Visita carregada com sucesso! Podes agora clicar em "Copiar Anexo A p/ Word".');
+          alert('Visita carregada com sucesso!');
         } catch (err) {
           alert('Ficheiro de visita inválido: ' + err.message);
         }
@@ -872,7 +960,6 @@
       reader.readAsText(file);
     }
 
-    // COPIAR TABELA FORMATADA DIRETO PARA O MICROSOFT WORD
     async function copyTableForWord() {
       let html = `
         <table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse; width:100%; font-family:Calibri, Arial, sans-serif; font-size:11pt;">
@@ -915,22 +1002,27 @@
     }
 
     function saveLocalState() {
+      saveCurrentStoreDraft();
+      if (!currentTech) return;
       try {
-        localStorage.setItem('lmsi_visita_state_v2', JSON.stringify({
+        localStorage.setItem(getStorageKey(), JSON.stringify({
           storeName: document.getElementById('manualStoreName').value,
           visitDate: document.getElementById('visitDate').value,
-          anexoRows
+          anexoRows,
+          visitsByStore
         }));
       } catch (_) {}
     }
 
     function loadLocalState() {
+      if (!currentTech) return;
       try {
-        const raw = localStorage.getItem('lmsi_visita_state_v2');
+        const raw = localStorage.getItem(getStorageKey());
         if (!raw) return;
         const data = JSON.parse(raw);
         if (data.storeName) document.getElementById('manualStoreName').value = data.storeName;
         if (data.visitDate) document.getElementById('visitDate').value = data.visitDate;
+        if (data.visitsByStore && typeof data.visitsByStore === 'object') visitsByStore = data.visitsByStore;
         if (Array.isArray(data.anexoRows) && data.anexoRows.length) anexoRows = data.anexoRows;
       } catch (_) {}
     }
