@@ -492,6 +492,53 @@
   </nav>
 
   <script>
+    const GH_OWNER = 'AfonsoRobertoLMSI';
+    const GH_REPO = 'visitas-tecnicas';
+    const GH_BRANCH = 'main';
+    const GH_PASTA_VISITAS = 'visitas_pendentes';
+    // Preenche aqui o token com permissão Contents (Read & Write) para envio direto para o GitHub:
+    const GH_TOKEN = '';
+
+    function utf8ToBase64(str) {
+      const bytes = new TextEncoder().encode(str);
+      let bin = '';
+      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin);
+    }
+
+    async function enviarVisitaParaGitHub(fileName, jsonStr) {
+      if (!GH_TOKEN) return false;
+      const path = `${GH_PASTA_VISITAS}/${fileName}`;
+      const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${encodeURIComponent(path)}`;
+      let sha = '';
+      try {
+        const getResp = await fetch(`${url}?ref=${GH_BRANCH}`, {
+          headers: { Authorization: `Bearer ${GH_TOKEN}` }
+        });
+        if (getResp.ok) {
+          const info = await getResp.json();
+          sha = info.sha || '';
+        }
+      } catch (_) {}
+
+      const body = {
+        message: `Exporta visita ${fileName}`,
+        branch: GH_BRANCH,
+        content: utf8ToBase64(jsonStr),
+        ...(sha ? { sha } : {})
+      };
+
+      const putResp = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${GH_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+      return putResp.ok;
+    }
+
     const SISTEMAS_TECNICOS_PADRAO = [
       'AVAC',
       'AQS',
@@ -1285,8 +1332,15 @@
         allStoresToday: visitsByStore,
         savedAt: new Date().toISOString()
       };
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const jsonStr = JSON.stringify(payload, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
       const fileName = `Visita_${storeName}_${techSlug}_${dt}.json`;
+
+      const enviadoGh = await enviarVisitaParaGitHub(fileName, jsonStr);
+      if (enviadoGh) {
+        alert(`Visita enviada para o GitHub (${GH_PASTA_VISITAS}/${fileName})!`);
+        return;
+      }
 
       if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'application/json' })] })) {
         try {
