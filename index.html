@@ -32,7 +32,6 @@
       padding-bottom: 84px;
     }
 
-    /* Ecrã de bloqueio / Auditor */
     #pinOverlay {
       position: fixed; inset: 0; background: linear-gradient(135deg, #143554, #1f4e79);
       z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;
@@ -49,7 +48,6 @@
       background: #fff;
     }
 
-    /* Barra Superior */
     header {
       background: var(--primary); color: #fff; padding: 11px 14px;
       position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -100,7 +98,6 @@
       display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
     }
 
-    /* Seleção Empresa -> Pesquisa Edifício -> Edifício -> Data -> Próxima Visita */
     .selector-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     }
@@ -118,18 +115,14 @@
     }
     textarea { resize: vertical; min-height: 62px; }
 
-    /* Páginas (Obrigatoriedades Legais vs Evidências) */
     .page-view { display: none; }
     .page-view.active { display: block; }
 
-    /* Obrigatoriedades Legais por Tema */
     .theme-group {
       border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden;
       background: #fff;
     }
-    .theme-group.has-problem {
-      border-color: #fca5a5;
-    }
+    .theme-group.has-problem { border-color: #fca5a5; }
     .theme-header {
       background: #f8fafc; padding: 10px 12px; font-weight: 700; font-size: 13.5px;
       color: var(--primary); display: flex; justify-content: space-between; align-items: center;
@@ -142,31 +135,20 @@
       font-size: 11px; padding: 3px 8px; border-radius: 999px; font-weight: 700;
       background: #dcfce7; color: #166534;
     }
-    .theme-badge.problem {
-      background: #fee2e2; color: #991b1b;
-    }
-    .theme-items {
-      padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;
-    }
+    .theme-badge.problem { background: #fee2e2; color: #991b1b; }
+    .theme-items { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
     .info-row {
       display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
       padding: 8px 10px; border-radius: 8px; background: #f8fafc; border-left: 4px solid #94a3b8;
       font-size: 13px;
     }
-    .info-row.ok {
-      background: #f0fdf4; border-left-color: var(--success);
-    }
-    .info-row.problem {
-      background: #fef2f2; border-left-color: #dc2626; color: #991b1b;
-    }
+    .info-row.ok { background: #f0fdf4; border-left-color: var(--success); }
+    .info-row.problem { background: #fef2f2; border-left-color: #dc2626; color: #991b1b; }
     .info-row.problem .info-label,
-    .info-row.problem .info-val {
-      color: #b91c1c; font-weight: 700;
-    }
+    .info-row.problem .info-val { color: #b91c1c; font-weight: 700; }
     .info-label { font-weight: 600; color: var(--muted); min-width: 120px; }
     .info-val { text-align: right; color: var(--text); word-break: break-word; }
 
-    /* Tabela Estado de Conservação (Evidências) */
     .cons-intro { font-size: 13px; color: var(--text); margin: 0 0 10px; }
     .cons-table {
       width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden;
@@ -198,19 +180,11 @@
       border-color: #0f172a; background: #e2e8f0; transform: scale(1.08);
       box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.2);
     }
-    .dot-circle {
-      width: 16px; height: 16px; border-radius: 50%; display: inline-block;
-    }
-    .dot-star {
-      font-size: 18px; line-height: 1; color: var(--grey-dot); display: inline-block;
-    }
-    .cons-legend {
-      margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
-    }
+    .dot-circle { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
+    .dot-star { font-size: 18px; line-height: 1; color: var(--grey-dot); display: inline-block; }
+    .cons-legend { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
     .cons-legend-title { font-weight: 800; font-size: 13px; margin-bottom: 8px; color: #000; }
-    .cons-legend-items {
-      display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; font-size: 12.5px;
-    }
+    .cons-legend-items { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; font-size: 12.5px; }
     .legend-item { display: inline-flex; align-items: center; gap: 6px; }
 
     @media (max-width: 680px) {
@@ -220,9 +194,7 @@
         border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px;
         padding: 10px; background: #fff !important;
       }
-      .cons-table td {
-        border: none; padding: 4px 0; text-align: left !important;
-      }
+      .cons-table td { border: none; padding: 4px 0; text-align: left !important; }
       .cons-sys-name { font-weight: 700; font-size: 14px; color: var(--primary); margin-bottom: 4px; }
       .cons-emp-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
       .cons-emp-wrap span { font-size: 12px; color: var(--muted); white-space: nowrap; }
@@ -231,7 +203,6 @@
       .dot-btn { width: 42px; height: 42px; }
     }
 
-    /* Itens do Relatório Antigo & Anexo A */
     .old-item {
       border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px;
       display: grid; grid-template-columns: 100px 1fr; gap: 12px; align-items: start; background: #fafbfc;
@@ -240,23 +211,15 @@
       width: 100px; height: 85px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border);
       background: #eee;
     }
-    .anexo-header {
-      color: var(--teal); font-size: 17px; font-weight: 800; margin: 2px 0;
-    }
-    table.anexo-table {
-      width: 100%; border-collapse: collapse; background: #fff;
-    }
+    .anexo-header { color: var(--teal); font-size: 17px; font-weight: 800; margin: 2px 0; }
+    table.anexo-table { width: 100%; border-collapse: collapse; background: #fff; }
     table.anexo-table th {
       background: #7f7f7f; color: #fff; font-weight: 700; font-size: 13px;
       padding: 10px; border: 1px solid #d0d0d0; text-align: center;
     }
-    table.anexo-table td {
-      border: 1px solid #d0d0d0; padding: 10px; vertical-align: top;
-    }
+    table.anexo-table td { border: 1px solid #d0d0d0; padding: 10px; vertical-align: top; }
     .desc-label { font-weight: 700; font-size: 12px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
-    .photo-box {
-      display: flex; flex-direction: column; align-items: center; gap: 8px;
-    }
+    .photo-box { display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .photo-preview {
       width: 180px; max-width: 100%; height: 135px; object-fit: contain;
       border: 1px dashed #94a3b8; border-radius: 8px; background: #f8fafc;
@@ -274,7 +237,6 @@
       .photo-preview { width: 100%; height: 190px; }
     }
 
-    /* Navegação Inferior (2 Páginas) */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
       background: #fff; border-top: 1px solid var(--border);
@@ -307,7 +269,6 @@
 </head>
 <body>
 
-  <!-- Ecrã de Seleção de Auditor -->
   <div id="pinOverlay" style="display:flex;">
     <div class="pin-card">
       <h2>🔒 Visitas Técnicas LMSI</h2>
@@ -322,11 +283,10 @@
         <option value="António Rato">António Rato</option>
       </select>
       <input type="password" id="pinInput" class="pin-input" placeholder="PIN da Equipa" />
-      <button class="btn btn-blue" style="width:100%; padding:13px;" onclick="unlockApp()">Carregar a Minha Ronda</button>
+      <button type="button" class="btn btn-blue" style="width:100%; padding:13px;" onclick="unlockApp()">Carregar a Minha Ronda</button>
     </div>
   </div>
 
-  <!-- Barra Superior -->
   <header>
     <div class="header-top">
       <div class="brand">
@@ -335,27 +295,26 @@
       </div>
       <div style="display:flex; gap:6px; align-items:center;">
         <span class="badge-sync" id="syncStatus">A aguardar auditor...</span>
-        <button class="btn-switch-auditor" onclick="switchTechnician()">Trocar Auditor</button>
-        <button class="toolbar-toggle" onclick="toggleToolbar()" title="Ferramentas e Exportação">⚙️ Opções</button>
+        <button type="button" class="btn-switch-auditor" onclick="switchTechnician()">Trocar Auditor</button>
+        <button type="button" class="toolbar-toggle" onclick="toggleToolbar()" title="Ferramentas e Exportação">⚙️ Opções</button>
       </div>
     </div>
     <div class="toolbar" id="topToolbar">
-      <button class="btn btn-green" onclick="document.getElementById('excelInput').click()">📊 Excel / Dados Local</button>
+      <button type="button" class="btn btn-green" onclick="document.getElementById('excelInput').click()">📊 Excel / Dados Local</button>
       <input type="file" id="excelInput" accept=".xlsx,.xlsm,.xls,.json" style="display:none" onchange="handleExcelOrJsonUpload(event)" />
 
-      <button class="btn btn-blue" onclick="document.getElementById('wordInput').click()">📄 Último Relatório (.docx)</button>
+      <button type="button" class="btn btn-blue" onclick="document.getElementById('wordInput').click()">📄 Último Relatório (.docx)</button>
       <input type="file" id="wordInput" accept=".docx,.docm" style="display:none" onchange="handleWordUpload(event)" />
 
-      <button class="btn btn-amber" onclick="exportVisitPackage()">📤 Guardar JSON Visita</button>
-      <button class="btn btn-purple" onclick="document.getElementById('pkgInput').click()">📥 Abrir JSON Visita</button>
+      <button type="button" class="btn btn-amber" onclick="exportVisitPackage()">📤 Guardar JSON Visita</button>
+      <button type="button" class="btn btn-purple" onclick="document.getElementById('pkgInput').click()">📥 Abrir JSON Visita</button>
       <input type="file" id="pkgInput" accept=".json" style="display:none" onchange="importVisitPackage(event)" />
 
-      <button class="btn btn-outline" onclick="copyTableForWord()">📋 Copiar Anexo A p/ Word</button>
+      <button type="button" class="btn btn-outline" onclick="copyTableForWord()">📋 Copiar Anexo A p/ Word</button>
     </div>
   </header>
 
   <div class="container">
-    <!-- Bloco de Seleção: Empresa -> Pesquisa + Edifício -> Data -> Próxima Visita -->
     <div class="card">
       <div class="selector-grid">
         <div>
@@ -382,7 +341,7 @@
           <input type="date" id="visitDate" onchange="saveLocalState()" />
         </div>
         <div>
-          <button class="btn btn-teal" style="width:100%; padding:10px 14px;" onclick="nextVisitInstallation()">⏭️ Próxima Visita</button>
+          <button type="button" class="btn btn-teal" style="width:100%; padding:10px 14px;" onclick="nextVisitInstallation()">⏭️ Próxima Visita</button>
         </div>
       </div>
 
@@ -392,7 +351,6 @@
       </div>
     </div>
 
-    <!-- PÁGINA 1: OBRIGATORIEDADES LEGAIS -->
     <div id="pageLegais" class="page-view active">
       <div class="card">
         <div class="card-title">
@@ -408,10 +366,7 @@
       </div>
     </div>
 
-    <!-- PÁGINA 2: EVIDÊNCIAS -->
     <div id="pageEvidencias" class="page-view">
-
-      <!-- Secção A: Estado de Conservação dos Sistemas Técnicos -->
       <div class="card">
         <div class="card-title">
           <span>🛠️ Estado de Conservação dos Sistemas Técnicos</span>
@@ -440,23 +395,21 @@
         </div>
       </div>
 
-      <!-- Secção B: Problemas do Último Relatório (se carregado .docx) -->
       <div class="card" id="secOldWord" style="display:none;">
         <div class="card-title">
           <span>⏪ Problemas do Último Relatório Word (.docx)</span>
-          <button class="btn btn-outline no-print" onclick="passAllOldToAnexo()">Passar Pendentes p/ Anexo A</button>
+          <button type="button" class="btn btn-outline no-print" onclick="passAllOldToAnexo()">Passar Pendentes p/ Anexo A</button>
         </div>
         <div id="oldReportContainer"></div>
       </div>
 
-      <!-- Secção C: Anexo A – Registo Fotográfico da Visita -->
       <div class="card" id="secAnexoA">
         <div class="card-title">
           <span class="anexo-header">ANEXO A – Registo Fotográfico da Visita</span>
           <div class="no-print" style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button class="btn btn-green" onclick="addAnexoRow()">+ Adicionar Linha</button>
-            <button class="btn btn-blue" onclick="copyTableForWord()">📋 Copiar p/ Word</button>
-            <button class="btn btn-outline" onclick="window.print()">🖨️ PDF / Imprimir</button>
+            <button type="button" class="btn btn-green" onclick="addAnexoRow()">+ Adicionar Linha</button>
+            <button type="button" class="btn btn-blue" onclick="copyTableForWord()">📋 Copiar p/ Word</button>
+            <button type="button" class="btn btn-outline" onclick="window.print()">🖨️ PDF / Imprimir</button>
           </div>
         </div>
 
@@ -473,27 +426,24 @@
         </table>
       </div>
 
-      <!-- Secção D: Notas do Auditor -->
       <div class="card" id="secNotas">
         <div class="card-title">
           <span>📝 Notas do Auditor</span>
-          <button class="btn btn-outline no-print" style="padding:4px 9px; font-size:11px;" onclick="startVoiceNotes()">🎙️ Ditar Notas</button>
+          <button type="button" class="btn btn-outline no-print" style="padding:4px 9px; font-size:11px;" onclick="startVoiceNotes()">🎙️ Ditar Notas</button>
         </div>
         <textarea id="auditorNotesInput" rows="4" placeholder="Escreve aqui observações gerais, apontamentos da visita ou notas internas..." oninput="saveLocalState()"></textarea>
       </div>
     </div>
   </div>
 
-  <!-- Botão Flutuante Câmara (visível na página Evidências) -->
-  <button class="fab-camera no-print" id="fabCameraBtn" style="display:none;" onclick="quickCameraRow()">📷 + Foto Rápida</button>
+  <button type="button" class="fab-camera no-print" id="fabCameraBtn" style="display:none;" onclick="quickCameraRow()">📷 + Foto Rápida</button>
   <input type="file" id="quickCamInput" accept="image/*" capture="environment" style="display:none" onchange="handleQuickCam(event)" />
 
-  <!-- Navegação Inferior: 2 Páginas -->
   <nav class="bottom-nav no-print">
-    <button class="nav-tab active" id="tabLegais" onclick="switchPage('legais')">
+    <button type="button" class="nav-tab active" id="tabLegais" onclick="switchPage('legais')">
       <span>📋 Obrigatoriedades Legais</span>
     </button>
-    <button class="nav-tab" id="tabEvidencias" onclick="switchPage('evidencias')">
+    <button type="button" class="nav-tab" id="tabEvidencias" onclick="switchPage('evidencias')">
       <span>📷 Evidências</span>
     </button>
   </nav>
@@ -591,14 +541,14 @@
     function slugifyTech(s) {
       return String(s || 'auditor')
         .toLowerCase()
-        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]/g, '') || 'auditor';
     }
 
     function normalizarTexto(s) {
       return String(s || '')
         .toLowerCase()
-        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .trim();
     }
 
@@ -616,7 +566,7 @@
       window.LMSI_DATA_B64 = null;
       window.LMSI_FOTOS_TEMP = null;
       document.getElementById('techBadge').textContent = `Auditor: ${tech}`;
-      document.getElementById('syncStatus').textContent = `A carregar ronda...`;
+      document.getElementById('syncStatus').textContent = 'A carregar ronda...';
 
       visitsByStore = {};
       conservacaoRows = createDefaultConservacao();
@@ -801,7 +751,6 @@
 
       renderLegalRequirementsByTheme(st);
 
-      // Restaurar rascunho se já existir para este edifício, senão iniciar limpo + dados do Excel/Fotos
       if (visitsByStore[st.edif]) {
         const saved = visitsByStore[st.edif];
         if (saved.visitDate) document.getElementById('visitDate').value = saved.visitDate;
@@ -837,24 +786,20 @@
       return base;
     }
 
-    /* Renderização das Obrigatoriedades Legais por Tema (com problemas a vermelho) */
     function renderLegalRequirementsByTheme(st) {
       const cont = document.getElementById('needsContainer');
       const countLbl = document.getElementById('needsCountLbl');
 
-      // 1. Se o JSON/Excel já trouxer estrutura agrupada por temas (st.temas)
       let temas = [];
       if (Array.isArray(st.temas) && st.temas.length > 0) {
         temas = st.temas;
       } else {
-        // 2. Agrupa automaticamente st.needs / st.info por tema
         const mapTemas = {};
         const addItem = (tema, label, valor, isProblem) => {
           if (!mapTemas[tema]) mapTemas[tema] = [];
           mapTemas[tema].push({ label, valor, problema: !!isProblem });
         };
 
-        // Informação Geral da Instalação
         if (st.emp) addItem('Identificação e Equipa', 'Empresa', st.emp, false);
         if (st.edif) addItem('Identificação e Equipa', 'Edifício / Instalação', st.edif, false);
         if (st.tge) addItem('Identificação e Equipa', 'TGE', st.tge, false);
@@ -886,7 +831,7 @@
         countLbl.textContent = `⚠️ ${totalProblems} problema(s) detetado(s)`;
       } else {
         countLbl.style.color = '#166534';
-        countLbl.textContent = `✅ Tudo conforme`;
+        countLbl.textContent = '✅ Tudo conforme';
       }
 
       if (temas.length === 0) {
@@ -937,11 +882,10 @@
 
     function detectIsProblem(msg) {
       const m = normalizarTexto(msg);
-      if (!m || m === '-' || m === 'n/a' || m === 'pes' || m.includes('conforme') && !m.includes('nao conforme')) return false;
+      if (!m || m === '-' || m === 'n/a' || m === 'pes' || (m.includes('conforme') && !m.includes('nao conforme'))) return false;
       return m.includes('falta') || m.includes('expirad') || m.includes('vencid') || m.includes('nao') || m.includes('sem ') || m.includes('pendente') || m.includes('acima');
     }
 
-    /* Tabela Estado de Conservação (Evidências) */
     function renderConservacaoTable() {
       const tbody = document.getElementById('conservacaoBody');
       if (!tbody) return;
@@ -1034,7 +978,6 @@
       }
     }
 
-    /* Leitura local de Excel/JSON (caso seja usado manualmente) */
     function handleExcelOrJsonUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -1152,7 +1095,6 @@
       return String(v).trim();
     }
 
-    /* Leitura manual de .docx caso necessário */
     async function handleWordUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -1233,8 +1175,7 @@
 
     function extractParagraphsText(tcNode) {
       const ps = Array.from(tcNode.getElementsByTagName('w:p'));
-      return ps.map(p => p.textContent.trim()).filter(Boolean).join('
-');
+      return ps.map(p => p.textContent.trim()).filter(Boolean).join('\n');
     }
 
     function renderOldReportItems(fileName) {
@@ -1246,15 +1187,15 @@
       cont.innerHTML = oldAnexoItems.map((it, idx) => `
         <div class="old-item">
           <div>
-            ${it.foto ? `<img src="${it.foto}" alt="Foto Antiga" />` : `<div style="width:100px;height:85px;background:#e2e8f0;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#64748b;">Sem Foto</div>`}
+            ${it.foto ? `<img src="${it.foto}" alt="Foto Antiga" />` : '<div style="width:100px;height:85px;background:#e2e8f0;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#64748b;">Sem Foto</div>'}
           </div>
           <div>
             <div style="font-weight:700; color:var(--primary); margin-bottom:4px;">${escapeHtml(it.eq || 'Equipamento s/ nome')} <span style="font-size:11px; color:var(--muted);">(${escapeHtml(it.estado)})</span></div>
             <div style="font-size:12px; margin-bottom:4px;"><b>Anomalia:</b> ${escapeHtml(it.anomalia)}</div>
             <div style="font-size:12px; margin-bottom:8px;"><b>Ação:</b> ${escapeHtml(it.acao)}</div>
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <button class="btn btn-amber" style="padding:6px 10px; font-size:12px;" onclick="sendOldToAnexo(${idx}, 'Não Resolvido')">Manter Pendente no Anexo A</button>
-              <button class="btn btn-green" style="padding:6px 10px; font-size:12px;" onclick="sendOldToAnexo(${idx}, 'Resolvido')">✅ Já Resolvido</button>
+              <button type="button" class="btn btn-amber" style="padding:6px 10px; font-size:12px;" onclick="sendOldToAnexo(${idx}, 'Não Resolvido')">Manter Pendente no Anexo A</button>
+              <button type="button" class="btn btn-green" style="padding:6px 10px; font-size:12px;" onclick="sendOldToAnexo(${idx}, 'Resolvido')">✅ Já Resolvido</button>
             </div>
           </div>
         </div>
@@ -1290,7 +1231,6 @@
       oldAnexoItems.forEach((_, idx) => sendOldToAnexo(idx, 'Não Resolvido'));
     }
 
-    /* Tabela Anexo A */
     function renderAnexoRows() {
       const tbody = document.getElementById('anexoBody');
       tbody.innerHTML = anexoRows.map((row, i) => `
@@ -1299,18 +1239,18 @@
             <label class="field-lbl">Equipamento</label>
             <input type="text" value="${escapeAttr(row.eq)}" placeholder="Ex: UTA 1 / Quadro..." oninput="updateRow(${i}, 'eq', this.value)" />
             <div class="no-print" style="margin-top:8px;">
-              <button class="btn btn-danger" style="padding:5px 9px; font-size:11px;" onclick="removeAnexoRow(${i})">🗑️ Apagar</button>
+              <button type="button" class="btn btn-danger" style="padding:5px 9px; font-size:11px;" onclick="removeAnexoRow(${i})">🗑️ Apagar</button>
             </div>
           </td>
           <td>
             <div class="desc-label">
               <span>Anomalia:</span>
-              <button class="btn btn-outline no-print" style="padding:3px 8px; font-size:11px;" onclick="startVoice(${i}, 'anomalia')">🎙️ Ditar</button>
+              <button type="button" class="btn btn-outline no-print" style="padding:3px 8px; font-size:11px;" onclick="startVoice(${i}, 'anomalia')">🎙️ Ditar</button>
             </div>
             <textarea placeholder="Descreve a anomalia..." oninput="updateRow(${i}, 'anomalia', this.value)">${escapeHtml(row.anomalia)}</textarea>
             <div class="desc-label" style="margin-top:8px;">
               <span>Ação:</span>
-              <button class="btn btn-outline no-print" style="padding:3px 8px; font-size:11px;" onclick="startVoice(${i}, 'acao')">🎙️ Ditar</button>
+              <button type="button" class="btn btn-outline no-print" style="padding:3px 8px; font-size:11px;" onclick="startVoice(${i}, 'acao')">🎙️ Ditar</button>
             </div>
             <textarea placeholder="Descreve a ação recomendada..." oninput="updateRow(${i}, 'acao', this.value)">${escapeHtml(row.acao)}</textarea>
           </td>
@@ -1318,7 +1258,7 @@
             <div class="photo-box">
               ${row.foto
                 ? `<img src="${row.foto}" class="photo-preview" />`
-                : `<div class="photo-preview" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">Sem fotografia</div>`
+                : '<div class="photo-preview" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">Sem fotografia</div>'
               }
               <div class="no-print" style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
                 <label class="btn btn-green" style="padding:7px 11px; font-size:12px;">
@@ -1440,8 +1380,7 @@
       rec.onresult = (e) => {
         const txt = e.results[0][0].transcript;
         const el = document.getElementById('auditorNotesInput');
-        el.value = (el.value ? el.value + '
-' : '') + txt;
+        el.value = (el.value ? el.value + '\n' : '') + txt;
         saveLocalState();
       };
       rec.start();
@@ -1517,37 +1456,12 @@
     }
 
     async function copyTableForWord() {
-      let html = `
-        <table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse; width:100%; font-family:Calibri, Arial, sans-serif; font-size:11pt;">
-          <thead>
-            <tr style="background-color:#7F7F7F; color:#FFFFFF; font-weight:bold; text-align:center;">
-              <th style="width:18%;">Equipamento</th>
-              <th style="width:38%;">Descrição</th>
-              <th style="width:28%;">Foto</th>
-              <th style="width:16%;">Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
+      let html = '<table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse; width:100%; font-family:Calibri, Arial, sans-serif; font-size:11pt;"><thead><tr style="background-color:#7F7F7F; color:#FFFFFF; font-weight:bold; text-align:center;"><th style="width:18%;">Equipamento</th><th style="width:38%;">Descrição</th><th style="width:28%;">Foto</th><th style="width:16%;">Estado</th></tr></thead><tbody>';
       anexoRows.forEach(r => {
         if (!r.eq && !r.anomalia && !r.acao && !r.foto) return;
-        html += `
-          <tr>
-            <td style="vertical-align:top;">${escapeHtml(r.eq)}</td>
-            <td style="vertical-align:top;">
-              <b>Anomalia:</b><br/>${escapeHtml(r.anomalia).replace(/
-/g, '<br/>')}<br/><br/>
-              <b>Ação:</b><br/>${escapeHtml(r.acao).replace(/
-/g, '<br/>')}
-            </td>
-            <td style="text-align:center; vertical-align:middle;">
-              ${r.foto ? `<img src="${r.foto}" width="190" style="max-width:190px; height:auto;" />` : ''}
-            </td>
-            <td style="text-align:center; vertical-align:middle;">${escapeHtml(r.estado)}</td>
-          </tr>
-        `;
+        html += `<tr><td style="vertical-align:top;">${escapeHtml(r.eq)}</td><td style="vertical-align:top;"><b>Anomalia:</b><br/>${escapeHtml(r.anomalia).replace(/\n/g, '<br/>')}<br/><br/><b>Ação:</b><br/>${escapeHtml(r.acao).replace(/\n/g, '<br/>')}</td><td style="text-align:center; vertical-align:middle;">${r.foto ? `<img src="${r.foto}" width="190" style="max-width:190px; height:auto;" />` : ''}</td><td style="text-align:center; vertical-align:middle;">${escapeHtml(r.estado)}</td></tr>`;
       });
-      html += `</tbody></table>`;
+      html += '</tbody></table>';
 
       try {
         const blobHtml = new Blob([html], { type: 'text/html' });
