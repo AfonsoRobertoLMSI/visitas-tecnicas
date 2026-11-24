@@ -1,2 +1,2 @@
 ﻿// Fotos Anexo A - Auditor: Afonso Roberto
-window.LMSI_FOTOS_TEMP = {"Alexandre Herculano 23 (Classique)":[]};
+window.LMSI_FOTOS_TEMP = {"BOQUEIRÃO DO DURO":[]};
