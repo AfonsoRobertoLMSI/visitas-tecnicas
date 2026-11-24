@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Visitas Técnicas LMSI - Melhoria Contínua v2</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <style>
+    :root {
+      --primary: #1f4e79;
+      --primary-dark: #143554;
+      --accent: #2e75b6;
+      --teal: #3b6e75;
+      --olive: #38761d;
+      --success: #00b050;
+      --warning: #ffc000;
+      --danger: #c00000;
+      --grey-dot: #808080;
+      --bg: #f3f6f9;
+      --card: #ffffff;
+      --border: #d8e0e8;
+      --text: #1e293b;
+      --muted: #64748b;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 84px;
+    }
+
+    /* Ecrã de bloqueio / Auditor */
+    #pinOverlay {
+      position: fixed; inset: 0; background: linear-gradient(135deg, #143554, #1f4e79);
+      z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .pin-card {
+      background: #fff; border-radius: 16px; max-width: 390px; width: 100%;
+      padding: 26px 22px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    .pin-card h2 { margin: 0 0 8px; color: var(--primary); font-size: 20px; }
+    .pin-card p { margin: 0 0 16px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .pin-input {
+      width: 100%; padding: 13px; font-size: 15px; text-align: center;
+      border: 2px solid var(--border); border-radius: 10px; margin-bottom: 12px; font-weight: 700;
+      background: #fff;
+    }
+
+    /* Barra Superior */
+    header {
+      background: var(--primary); color: #fff; padding: 11px 14px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .header-top {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+    }
+    .brand { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge-sync {
+      font-size: 11px; padding: 4px 9px; border-radius: 999px; background: rgba(255,255,255,0.18);
+      font-weight: 600;
+    }
+    .btn-switch-auditor {
+      background: #ffffff; color: var(--primary); border: none; border-radius: 8px;
+      padding: 6px 11px; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+    .toolbar-toggle {
+      background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 8px; padding: 5px 9px; font-size: 11px; font-weight: 600; cursor: pointer;
+    }
+    .toolbar {
+      display: none; gap: 8px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+    }
+    .toolbar.open { display: flex; }
+
+    .btn {
+      border: none; border-radius: 8px; padding: 9px 13px; font-size: 13px; font-weight: 600;
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      transition: transform 0.08s ease, opacity 0.15s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-green { background: #217346; color: #fff; }
+    .btn-blue { background: #2b579a; color: #fff; }
+    .btn-amber { background: #e67e22; color: #fff; }
+    .btn-purple { background: #6f42c1; color: #fff; }
+    .btn-teal { background: #2a7b88; color: #fff; }
+    .btn-outline { background: #fff; color: var(--primary); border: 1px solid var(--border); }
+    .btn-danger { background: #c82333; color: #fff; }
+
+    .container { max-width: 1180px; margin: 12px auto; padding: 0 12px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .card-title {
+      font-size: 15px; font-weight: 700; color: var(--primary); margin: 0 0 10px;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+    }
+
+    /* Seleção Empresa -> Pesquisa Edifício -> Edifício -> Data -> Próxima Visita */
+    .selector-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .selector-bottom {
+      display: grid; grid-template-columns: 1fr 155px auto; gap: 10px; align-items: end; margin-top: 10px;
+    }
+    @media (max-width: 720px) {
+      .selector-grid { grid-template-columns: 1fr; }
+      .selector-bottom { grid-template-columns: 1fr; }
+    }
+    label.field-lbl { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+    select, input[type="text"], input[type="date"], textarea {
+      width: 100%; padding: 10px 11px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 14px; font-family: inherit; background: #fff; color: var(--text);
+    }
+    textarea { resize: vertical; min-height: 62px; }
+
+    /* Páginas (Obrigatoriedades Legais vs Evidências) */
+    .page-view { display: none; }
+    .page-view.active { display: block; }
+
+    /* Obrigatoriedades Legais por Tema */
+    .theme-group {
+      border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden;
+      background: #fff;
+    }
+    .theme-group.has-problem {
+      border-color: #fca5a5;
+    }
+    .theme-header {
+      background: #f8fafc; padding: 10px 12px; font-weight: 700; font-size: 13.5px;
+      color: var(--primary); display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .theme-group.has-problem .theme-header {
+      background: #fef2f2; color: #991b1b; border-bottom-color: #fecaca;
+    }
+    .theme-badge {
+      font-size: 11px; padding: 3px 8px; border-radius: 999px; font-weight: 700;
+      background: #dcfce7; color: #166534;
+    }
+    .theme-badge.problem {
+      background: #fee2e2; color: #991b1b;
+    }
+    .theme-items {
+      padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .info-row {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+      padding: 8px 10px; border-radius: 8px; background: #f8fafc; border-left: 4px solid #94a3b8;
+      font-size: 13px;
+    }
+    .info-row.ok {
+      background: #f0fdf4; border-left-color: var(--success);
+    }
+    .info-row.problem {
+      background: #fef2f2; border-left-color: #dc2626; color: #991b1b;
+    }
+    .info-row.problem .info-label,
+    .info-row.problem .info-val {
+      color: #b91c1c; font-weight: 700;
+    }
+    .info-label { font-weight: 600; color: var(--muted); min-width: 120px; }
+    .info-val { text-align: right; color: var(--text); word-break: break-word; }
+
+    /* Tabela Estado de Conservação (Evidências) */
+    .cons-intro { font-size: 13px; color: var(--text); margin: 0 0 10px; }
+    .cons-table {
+      width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden;
+    }
+    .cons-table th {
+      background: #f2f2f2; color: var(--olive); font-weight: 800; font-size: 12px;
+      text-transform: uppercase; padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center;
+    }
+    .cons-table th:first-child { text-align: left; }
+    .cons-table td {
+      padding: 10px 8px; border: 1px solid #e2e8f0; font-size: 13px; vertical-align: middle;
+    }
+    .cons-table tr:nth-child(even) td { background: #f8fafc; }
+    .cons-emp-input {
+      width: 100%; padding: 7px 8px; font-size: 12.5px; text-align: center;
+      border: 1px solid #cbd5e1; border-radius: 6px; background: #fff;
+    }
+    .dots-picker {
+      display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: nowrap;
+    }
+    .dot-btn {
+      width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent;
+      background: #fff; display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; padding: 0; transition: transform 0.1s, box-shadow 0.1s, border-color 0.15s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    .dot-btn:active { transform: scale(0.92); }
+    .dot-btn.selected {
+      border-color: #0f172a; background: #e2e8f0; transform: scale(1.08);
+      box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.2);
+    }
+    .dot-circle {
+      width: 16px; height: 16px; border-radius: 50%; display: inline-block;
+    }
+    .dot-star {
+      font-size: 18px; line-height: 1; color: var(--grey-dot); display: inline-block;
+    }
+    .cons-legend {
+      margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
+    }
+    .cons-legend-title { font-weight: 800; font-size: 13px; margin-bottom: 8px; color: #000; }
+    .cons-legend-items {
+      display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; font-size: 12.5px;
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+
+    @media (max-width: 680px) {
+      .cons-table thead { display: none; }
+      .cons-table, .cons-table tbody, .cons-table tr, .cons-table td { display: block; width: 100%; }
+      .cons-table tr {
+        border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px;
+        padding: 10px; background: #fff !important;
+      }
+      .cons-table td {
+        border: none; padding: 4px 0; text-align: left !important;
+      }
+      .cons-sys-name { font-weight: 700; font-size: 14px; color: var(--primary); margin-bottom: 4px; }
+      .cons-emp-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+      .cons-emp-wrap span { font-size: 12px; color: var(--muted); white-space: nowrap; }
+      .cons-emp-input { text-align: left; }
+      .dots-picker { justify-content: space-between; padding-top: 4px; }
+      .dot-btn { width: 42px; height: 42px; }
+    }
+
+    /* Itens do Relatório Antigo & Anexo A */
+    .old-item {
+      border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px;
+      display: grid; grid-template-columns: 100px 1fr; gap: 12px; align-items: start; background: #fafbfc;
+    }
+    .old-item img {
+      width: 100px; height: 85px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border);
+      background: #eee;
+    }
+    .anexo-header {
+      color: var(--teal); font-size: 17px; font-weight: 800; margin: 2px 0;
+    }
+    table.anexo-table {
+      width: 100%; border-collapse: collapse; background: #fff;
+    }
+    table.anexo-table th {
+      background: #7f7f7f; color: #fff; font-weight: 700; font-size: 13px;
+      padding: 10px; border: 1px solid #d0d0d0; text-align: center;
+    }
+    table.anexo-table td {
+      border: 1px solid #d0d0d0; padding: 10px; vertical-align: top;
+    }
+    .desc-label { font-weight: 700; font-size: 12px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
+    .photo-box {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .photo-preview {
+      width: 180px; max-width: 100%; height: 135px; object-fit: contain;
+      border: 1px dashed #94a3b8; border-radius: 8px; background: #f8fafc;
+    }
+    @media (max-width: 768px) {
+      table.anexo-table thead { display: none; }
+      table.anexo-table, table.anexo-table tbody, table.anexo-table tr, table.anexo-table td {
+        display: block; width: 100%;
+      }
+      table.anexo-table tr {
+        margin-bottom: 14px; border: 2px solid var(--border); border-radius: 12px;
+        overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      }
+      table.anexo-table td { border: none; border-bottom: 1px solid #edf2f7; }
+      .photo-preview { width: 100%; height: 190px; }
+    }
+
+    /* Navegação Inferior (2 Páginas) */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
+      background: #fff; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-around; align-items: center; z-index: 200;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+    }
+    .nav-tab {
+      flex: 1; height: 100%; text-align: center; font-size: 13px; font-weight: 600; color: var(--muted);
+      padding: 8px 6px; cursor: pointer; border: none; background: none;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    }
+    .nav-tab.active {
+      color: var(--primary); font-weight: 800; border-top: 3px solid var(--primary); background: #f8fafc;
+    }
+
+    .fab-camera {
+      position: fixed; right: 16px; bottom: 76px; z-index: 210;
+      background: #217346; color: #fff; border: none; border-radius: 999px;
+      padding: 13px 17px; font-size: 13.5px; font-weight: 700;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25); cursor: pointer;
+    }
+
+    @media print {
+      header, .bottom-nav, .fab-camera, .no-print { display: none !important; }
+      body { background: #fff; padding: 0; }
+      .card { border: none; box-shadow: none; padding: 0; }
+      .page-view { display: block !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ecrã de Seleção de Auditor -->
+  <div id="pinOverlay" style="display:flex;">
+    <div class="pin-card">
+      <h2>🔒 Visitas Técnicas LMSI</h2>
+      <p>Seleciona o teu nome e introduz o PIN da equipa (<strong>LMSI</strong> ou <strong>1234</strong>).</p>
+      <select id="techSelect" class="pin-input" style="letter-spacing:0;">
+        <option value="">-- Seleciona o Auditor --</option>
+        <option value="Bernardo Nunes">Bernardo Nunes</option>
+        <option value="Bernardo Vieira">Bernardo Vieira</option>
+        <option value="João Simões">João Simões</option>
+        <option value="Valter Palma">Valter Palma</option>
+        <option value="Afonso Roberto">Afonso Roberto</option>
+        <option value="António Rato">António Rato</option>
+      </select>
+      <input type="password" id="pinInput" class="pin-input" placeholder="PIN da Equipa" />
+      <button class="btn btn-blue" style="width:100%; padding:13px;" onclick="unlockApp()">Carregar a Minha Ronda</button>
+    </div>
+  </div>
+
+  <!-- Barra Superior -->
+  <header>
+    <div class="header-top">
+      <div class="brand">
+        <span>🏢 Visitas LMSI</span>
+        <span class="badge-sync" id="techBadge">Auditor: —</span>
+      </div>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span class="badge-sync" id="syncStatus">A aguardar auditor...</span>
+        <button class="btn-switch-auditor" onclick="switchTechnician()">Trocar Auditor</button>
+        <button class="toolbar-toggle" onclick="toggleToolbar()" title="Ferramentas e Exportação">⚙️ Opções</button>
+      </div>
+    </div>
+    <div class="toolbar" id="topToolbar">
+      <button class="btn btn-green" onclick="document.getElementById('excelInput').click()">📊 Excel / Dados Local</button>
+      <input type="file" id="excelInput" accept=".xlsx,.xlsm,.xls,.json" style="display:none" onchange="handleExcelOrJsonUpload(event)" />
+
+      <button class="btn btn-blue" onclick="document.getElementById('wordInput').click()">📄 Último Relatório (.docx)</button>
+      <input type="file" id="wordInput" accept=".docx,.docm" style="display:none" onchange="handleWordUpload(event)" />
+
+      <button class="btn btn-amber" onclick="exportVisitPackage()">📤 Guardar JSON Visita</button>
+      <button class="btn btn-purple" onclick="document.getElementById('pkgInput').click()">📥 Abrir JSON Visita</button>
+      <input type="file" id="pkgInput" accept=".json" style="display:none" onchange="importVisitPackage(event)" />
+
+      <button class="btn btn-outline" onclick="copyTableForWord()">📋 Copiar Anexo A p/ Word</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Bloco de Seleção: Empresa -> Pesquisa + Edifício -> Data -> Próxima Visita -->
+    <div class="card">
+      <div class="selector-grid">
+        <div>
+          <label class="field-lbl">1. Escolher Empresa</label>
+          <select id="companySelect" onchange="onCompanyChange()">
+            <option value="">-- Todas as Empresas --</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-lbl">2. Procurar Edifício (Texto)</label>
+          <input type="text" id="buildingSearchInput" placeholder="Escreve para filtrar edifício..." oninput="onBuildingSearch()" />
+        </div>
+      </div>
+
+      <div class="selector-bottom">
+        <div>
+          <label class="field-lbl">3. Escolher Edifício</label>
+          <select id="storeSelect" onchange="onStoreChange()">
+            <option value="">-- Seleciona o Edifício --</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-lbl">Data da Visita</label>
+          <input type="date" id="visitDate" onchange="saveLocalState()" />
+        </div>
+        <div>
+          <button class="btn btn-teal" style="width:100%; padding:10px 14px;" onclick="nextVisitInstallation()">⏭️ Próxima Visita</button>
+        </div>
+      </div>
+
+      <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <input type="text" id="manualStoreName" placeholder="Nome do Edifício selecionado" oninput="saveLocalState()" style="flex:1;" />
+        <span style="font-size:12px; color:var(--muted);" id="rondaCounterLbl">Instalações trabalhadas hoje: 0</span>
+      </div>
+    </div>
+
+    <!-- PÁGINA 1: OBRIGATORIEDADES LEGAIS -->
+    <div id="pageLegais" class="page-view active">
+      <div class="card">
+        <div class="card-title">
+          <span>📋 Obrigatoriedades Legais por Tema</span>
+          <span style="font-size:12px; font-weight:700;" id="needsCountLbl"></span>
+        </div>
+        <div id="needsContainer">
+          <div class="info-row ok">
+            <span class="info-label">Informação</span>
+            <span class="info-val">Escolhe uma empresa e um edifício acima para ver os temas e estados.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA 2: EVIDÊNCIAS -->
+    <div id="pageEvidencias" class="page-view">
+
+      <!-- Secção A: Estado de Conservação dos Sistemas Técnicos -->
+      <div class="card">
+        <div class="card-title">
+          <span>🛠️ Estado de Conservação dos Sistemas Técnicos</span>
+        </div>
+        <p class="cons-intro">Para a execução do PMP dos sistemas técnicos, encontram-se contratados:</p>
+        <table class="cons-table" id="conservacaoTable">
+          <thead>
+            <tr>
+              <th style="width:32%;">Sistemas Técnicos</th>
+              <th style="width:28%;">Empresa Prestadora do Serviço de Manutenção</th>
+              <th style="width:40%;">Estado de Conservação</th>
+            </tr>
+          </thead>
+          <tbody id="conservacaoBody"></tbody>
+        </table>
+
+        <div class="cons-legend">
+          <div class="cons-legend-title">Legenda</div>
+          <div class="cons-legend-items">
+            <span class="legend-item"><span class="dot-circle" style="background:#00b050;"></span> Adequado</span>
+            <span class="legend-item"><span class="dot-circle" style="background:#ffc000;"></span> Razoável</span>
+            <span class="legend-item"><span class="dot-circle" style="background:#c00000;"></span> Não adequado</span>
+            <span class="legend-item"><span class="dot-circle" style="background:#808080;"></span> Não avaliado</span>
+            <span class="legend-item"><span class="dot-star">★</span> Não Aplicável</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secção B: Problemas do Último Relatório (se carregado .docx) -->
+      <div class="card" id="secOldWord" style="display:none;">
+        <div class="card-title">
+          <span>⏪ Problemas do Último Relatório Word (.docx)</span>
+          <button class="btn btn-outline no-print" onclick="passAllOldToAnexo()">Passar Pendentes p/ Anexo A</button>
+        </div>
+        <div id="oldReportContainer"></div>
+      </div>
+
+      <!-- Secção C: Anexo A – Registo Fotográfico da Visita -->
+      <div class="card" id="secAnexoA">
+        <div class="card-title">
+          <span class="anexo-header">ANEXO A – Registo Fotográfico da Visita</span>
+          <div class="no-print" style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-green" onclick="addAnexoRow()">+ Adicionar Linha</button>
+            <button class="btn btn-blue" onclick="copyTableForWord()">📋 Copiar p/ Word</button>
+            <button class="btn btn-outline" onclick="window.print()">🖨️ PDF / Imprimir</button>
+          </div>
+        </div>
+
+        <table class="anexo-table" id="anexoTable">
+          <thead>
+            <tr>
+              <th style="width:18%;">Equipamento</th>
+              <th style="width:38%;">Descrição</th>
+              <th style="width:28%;">Foto</th>
+              <th style="width:16%;">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="anexoBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Secção D: Notas do Auditor -->
+      <div class="card" id="secNotas">
+        <div class="card-title">
+          <span>📝 Notas do Auditor</span>
+          <button class="btn btn-outline no-print" style="padding:4px 9px; font-size:11px;" onclick="startVoiceNotes()">🎙️ Ditar Notas</button>
+        </div>
+        <textarea id="auditorNotesInput" rows="4" placeholder="Escreve aqui observações gerais, apontamentos da visita ou notas internas..." oninput="saveLocalState()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botão Flutuante Câmara (visível na página Evidências) -->
+  <button class="fab-camera no-print" id="fabCameraBtn" style="display:none;" onclick="quickCameraRow()">📷 + Foto Rápida</button>
+  <input type="file" id="quickCamInput" accept="image/*" capture="environment" style="display:none" onchange="handleQuickCam(event)" />
+
+  <!-- Navegação Inferior: 2 Páginas -->
+  <nav class="bottom-nav no-print">
+    <button class="nav-tab active" id="tabLegais" onclick="switchPage('legais')">
+      <span>📋 Obrigatoriedades Legais</span>
+    </button>
+    <button class="nav-tab" id="tabEvidencias" onclick="switchPage('evidencias')">
+      <span>📷 Evidências</span>
+    </button>
+  </nav>
+
+  <script>
+    const SISTEMAS_TECNICOS_PADRAO = [
+      'AVAC',
+      'AQS',
+      'Iluminação Fixa',
+      'SACE (GTC)',
+      'Meios de Elevação',
+      'Sistemas Fotovoltaicos',
+      'Postos de Carregamento de Veículos Elétricos'
+    ];
+
+    const ESTADOS_CONSERVACAO = [
+      { id: 'adequado', label: 'Adequado', color: '#00b050', type: 'dot' },
+      { id: 'razoavel', label: 'Razoável', color: '#ffc000', type: 'dot' },
+      { id: 'nao_adequado', label: 'Não adequado', color: '#c00000', type: 'dot' },
+      { id: 'nao_avaliado', label: 'Não avaliado', color: '#808080', type: 'dot' },
+      { id: 'nao_aplicavel', label: 'Não Aplicável', color: '#808080', type: 'star' }
+    ];
+
+    let currentTech = '';
+    let activePage = 'legais';
+    let storesData = [];
+    let filteredStoreIndices = [];
+    let oldAnexoItems = [];
+    let visitsByStore = {};
+
+    let conservacaoRows = createDefaultConservacao();
+    let anexoRows = [
+      { id: Date.now() + 1, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }
+    ];
+    let auditorNotes = '';
+
+    function createDefaultConservacao() {
+      return SISTEMAS_TECNICOS_PADRAO.map(sys => ({
+        sistema: sys,
+        empresa: '',
+        estado: ''
+      }));
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('visitDate').valueAsDate = new Date();
+      renderConservacaoTable();
+      const savedTech = localStorage.getItem('lmsi_tech_name') || '';
+      const pinOk = localStorage.getItem('lmsi_pin_ok') === '1';
+      if (savedTech) document.getElementById('techSelect').value = savedTech;
+
+      if (pinOk && savedTech) {
+        document.getElementById('pinOverlay').style.display = 'none';
+        initTechnicianSession(savedTech);
+      }
+    });
+
+    function toggleToolbar() {
+      document.getElementById('topToolbar').classList.toggle('open');
+    }
+
+    function switchPage(page) {
+      activePage = page;
+      document.getElementById('pageLegais').classList.toggle('active', page === 'legais');
+      document.getElementById('pageEvidencias').classList.toggle('active', page === 'evidencias');
+      document.getElementById('tabLegais').classList.toggle('active', page === 'legais');
+      document.getElementById('tabEvidencias').classList.toggle('active', page === 'evidencias');
+      document.getElementById('fabCameraBtn').style.display = (page === 'evidencias') ? 'inline-flex' : 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function switchTechnician() {
+      document.getElementById('pinOverlay').style.display = 'flex';
+    }
+
+    function unlockApp() {
+      const tech = (document.getElementById('techSelect').value || '').trim();
+      const val = (document.getElementById('pinInput').value || '').trim().toUpperCase();
+      const alreadyAuthed = localStorage.getItem('lmsi_pin_ok') === '1';
+
+      if (!tech) {
+        alert('Seleciona o teu nome na lista de auditores.');
+        return;
+      }
+      if (!alreadyAuthed && val !== 'LMSI' && val !== '1234' && val !== 'LMSI2026') {
+        alert('PIN incorreto. Usa LMSI ou 1234.');
+        return;
+      }
+      localStorage.setItem('lmsi_pin_ok', '1');
+      localStorage.setItem('lmsi_tech_name', tech);
+      document.getElementById('pinOverlay').style.display = 'none';
+      initTechnicianSession(tech);
+    }
+
+    function slugifyTech(s) {
+      return String(s || 'auditor')
+        .toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]/g, '') || 'auditor';
+    }
+
+    function normalizarTexto(s) {
+      return String(s || '')
+        .toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .trim();
+    }
+
+    function normalizarNomeEdif(s) {
+      return normalizarTexto(s).replace(/[^a-z0-9]/g, '');
+    }
+
+    function getStorageKey() {
+      return 'lmsi_visita_state_v3_' + slugifyTech(currentTech);
+    }
+
+    function initTechnicianSession(tech) {
+      currentTech = tech;
+      const slug = slugifyTech(tech);
+      window.LMSI_DATA_B64 = null;
+      window.LMSI_FOTOS_TEMP = null;
+      document.getElementById('techBadge').textContent = `Auditor: ${tech}`;
+      document.getElementById('syncStatus').textContent = `A carregar ronda...`;
+
+      visitsByStore = {};
+      conservacaoRows = createDefaultConservacao();
+      anexoRows = [{ id: Date.now() + 1, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }];
+      auditorNotes = '';
+      document.getElementById('auditorNotesInput').value = '';
+
+      loadLocalState();
+      renderConservacaoTable();
+      renderAnexoRows();
+      updateRondaCounter();
+
+      loadScriptAsync(`dados_lmsi_${slug}.js?t=${Date.now()}`, () => {
+        loadScriptAsync(`fotos_ronda_${slug}.js?t=${Date.now()}`, () => {
+          loadEmbeddedJsData();
+          applyTempPhotosForCurrentStore();
+          renderAnexoRows();
+          saveLocalState();
+        });
+      });
+    }
+
+    function loadScriptAsync(src, onDone) {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = () => { if (onDone) onDone(); };
+      s.onerror = () => { if (onDone) onDone(); };
+      document.head.appendChild(s);
+    }
+
+    function decodeBase64Utf8(b64) {
+      const bin = atob(String(b64 || '').replace(/\s+/g, ''));
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return new TextDecoder('utf-8').decode(bytes);
+    }
+
+    function loadEmbeddedJsData() {
+      if (!window.LMSI_DATA_B64) {
+        document.getElementById('syncStatus').textContent = `Sem ronda preparada p/ ${currentTech}`;
+        return;
+      }
+      try {
+        const jsonText = decodeBase64Utf8(window.LMSI_DATA_B64);
+        const parsed = JSON.parse(jsonText);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          populateStoresDropdown(parsed, `Ronda ${currentTech}`);
+        }
+      } catch (err) {
+        console.error('Erro ao descodificar dados:', err);
+        document.getElementById('syncStatus').textContent = 'Erro nos dados da ronda';
+      }
+    }
+
+    function populateStoresDropdown(list, sourceLabel) {
+      storesData = list;
+      const compSel = document.getElementById('companySelect');
+      const companies = Array.from(new Set(
+        storesData.map(st => String(st.emp || 'Sem Empresa').trim()).filter(Boolean)
+      )).sort((a, b) => a.localeCompare(b, 'pt'));
+
+      compSel.innerHTML = '<option value="">-- Todas as Empresas (' + companies.length + ') --</option>';
+      companies.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        compSel.appendChild(opt);
+      });
+
+      document.getElementById('buildingSearchInput').value = '';
+      document.getElementById('syncStatus').textContent = `${sourceLabel}: ${storesData.length} edifício(s)`;
+      filterBuildingsList(true);
+    }
+
+    function onCompanyChange() {
+      filterBuildingsList(true);
+    }
+
+    function onBuildingSearch() {
+      filterBuildingsList(false);
+    }
+
+    function filterBuildingsList(autoSelectFirst) {
+      const selectedCompany = document.getElementById('companySelect').value;
+      const searchNorm = normalizarTexto(document.getElementById('buildingSearchInput').value);
+      const sel = document.getElementById('storeSelect');
+      const prevVal = sel.value;
+
+      filteredStoreIndices = [];
+      storesData.forEach((st, idx) => {
+        const emp = String(st.emp || 'Sem Empresa').trim();
+        const edif = String(st.edif || '').trim();
+        const matchComp = !selectedCompany || emp === selectedCompany;
+        const matchSearch = !searchNorm || normalizarTexto(edif).includes(searchNorm) || normalizarTexto(emp).includes(searchNorm);
+        if (matchComp && matchSearch) {
+          filteredStoreIndices.push(idx);
+        }
+      });
+
+      sel.innerHTML = '<option value="">-- Seleciona o Edifício (' + filteredStoreIndices.length + ') --</option>';
+      filteredStoreIndices.forEach(idx => {
+        const st = storesData[idx];
+        const problemsCount = countStoreProblems(st);
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = `${st.edif} (${st.emp || 'LMSI'})${problemsCount > 0 ? ' — ' + problemsCount + ' alerta(s)' : ''}`;
+        sel.appendChild(opt);
+      });
+
+      if (filteredStoreIndices.length === 0) {
+        return;
+      }
+
+      if (!autoSelectFirst && prevVal !== '' && filteredStoreIndices.includes(Number(prevVal))) {
+        sel.value = prevVal;
+      } else if (autoSelectFirst || filteredStoreIndices.length === 1) {
+        sel.value = filteredStoreIndices[0];
+        onStoreChange();
+      }
+    }
+
+    function countStoreProblems(st) {
+      if (Array.isArray(st.temas)) {
+        let count = 0;
+        st.temas.forEach(t => {
+          (t.itens || []).forEach(it => { if (it.problema) count++; });
+        });
+        return count;
+      }
+      return (st.needs || []).filter(n => n.problema !== false).length;
+    }
+
+    function nextVisitInstallation() {
+      saveCurrentStoreDraft();
+      const sel = document.getElementById('storeSelect');
+      if (filteredStoreIndices.length > 0) {
+        const currPos = filteredStoreIndices.indexOf(Number(sel.value));
+        const nextPos = (currPos + 1) % filteredStoreIndices.length;
+        sel.value = filteredStoreIndices[nextPos];
+        onStoreChange();
+      } else if (storesData.length > 0) {
+        const nextIdx = (Number(sel.value) + 1) % storesData.length;
+        sel.value = nextIdx;
+        onStoreChange();
+      } else {
+        document.getElementById('manualStoreName').value = '';
+        conservacaoRows = createDefaultConservacao();
+        anexoRows = [{ id: Date.now(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }];
+        auditorNotes = '';
+        document.getElementById('auditorNotesInput').value = '';
+        renderConservacaoTable();
+        renderAnexoRows();
+        saveLocalState();
+      }
+      updateRondaCounter();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function saveCurrentStoreDraft() {
+      const key = (document.getElementById('manualStoreName').value || '').trim();
+      if (!key) return;
+      auditorNotes = document.getElementById('auditorNotesInput').value || '';
+      visitsByStore[key] = {
+        visitDate: document.getElementById('visitDate').value,
+        conservacaoRows: JSON.parse(JSON.stringify(conservacaoRows)),
+        anexoRows: JSON.parse(JSON.stringify(anexoRows)),
+        auditorNotes: auditorNotes
+      };
+      updateRondaCounter();
+    }
+
+    function updateRondaCounter() {
+      const count = Object.keys(visitsByStore).length;
+      document.getElementById('rondaCounterLbl').textContent = `Instalações trabalhadas hoje (${currentTech}): ${count}`;
+    }
+
+    function onStoreChange() {
+      const idx = document.getElementById('storeSelect').value;
+      if (idx === '' || !storesData[idx]) return;
+      const st = storesData[idx];
+      document.getElementById('manualStoreName').value = st.edif;
+
+      renderLegalRequirementsByTheme(st);
+
+      // Restaurar rascunho se já existir para este edifício, senão iniciar limpo + dados do Excel/Fotos
+      if (visitsByStore[st.edif]) {
+        const saved = visitsByStore[st.edif];
+        if (saved.visitDate) document.getElementById('visitDate').value = saved.visitDate;
+        conservacaoRows = Array.isArray(saved.conservacaoRows) ? JSON.parse(JSON.stringify(saved.conservacaoRows)) : createDefaultConservacaoFromStore(st);
+        anexoRows = Array.isArray(saved.anexoRows) ? JSON.parse(JSON.stringify(saved.anexoRows)) : [{ id: Date.now(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }];
+        auditorNotes = saved.auditorNotes || '';
+      } else {
+        conservacaoRows = createDefaultConservacaoFromStore(st);
+        anexoRows = [{ id: Date.now(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }];
+        auditorNotes = '';
+      }
+
+      document.getElementById('auditorNotesInput').value = auditorNotes;
+      applyTempPhotosForCurrentStore();
+      renderConservacaoTable();
+      renderAnexoRows();
+      saveLocalState();
+    }
+
+    function createDefaultConservacaoFromStore(st) {
+      const base = createDefaultConservacao();
+      if (st.sistemas && typeof st.sistemas === 'object') {
+        base.forEach(row => {
+          const val = st.sistemas[row.sistema] || st.sistemas[normalizarTexto(row.sistema)] || '';
+          if (val) {
+            row.empresa = val;
+            if (val.toUpperCase() === 'N/A' || val === '-') {
+              row.estado = 'nao_aplicavel';
+            }
+          }
+        });
+      }
+      return base;
+    }
+
+    /* Renderização das Obrigatoriedades Legais por Tema (com problemas a vermelho) */
+    function renderLegalRequirementsByTheme(st) {
+      const cont = document.getElementById('needsContainer');
+      const countLbl = document.getElementById('needsCountLbl');
+
+      // 1. Se o JSON/Excel já trouxer estrutura agrupada por temas (st.temas)
+      let temas = [];
+      if (Array.isArray(st.temas) && st.temas.length > 0) {
+        temas = st.temas;
+      } else {
+        // 2. Agrupa automaticamente st.needs / st.info por tema
+        const mapTemas = {};
+        const addItem = (tema, label, valor, isProblem) => {
+          if (!mapTemas[tema]) mapTemas[tema] = [];
+          mapTemas[tema].push({ label, valor, problema: !!isProblem });
+        };
+
+        // Informação Geral da Instalação
+        if (st.emp) addItem('Identificação e Equipa', 'Empresa', st.emp, false);
+        if (st.edif) addItem('Identificação e Equipa', 'Edifício / Instalação', st.edif, false);
+        if (st.tge) addItem('Identificação e Equipa', 'TGE', st.tge, false);
+        if (st.om) addItem('Identificação e Equipa', 'O&M Engineer', st.om, false);
+        if (st.ultVisita) addItem('Identificação e Equipa', 'Última Visita', st.ultVisita, false);
+
+        if (Array.isArray(st.needs)) {
+          st.needs.forEach(n => {
+            const tema = n.tema || mapCategoryToTheme(n.cat || 'Geral');
+            const label = n.label || n.cat || 'Requisito';
+            const valor = n.valor || n.msg || '';
+            const isProb = (n.problema !== undefined) ? !!n.problema : detectIsProblem(valor);
+            addItem(tema, label, valor, isProb);
+          });
+        }
+
+        Object.keys(mapTemas).forEach(k => {
+          temas.push({ tema: k, itens: mapTemas[k] });
+        });
+      }
+
+      let totalProblems = 0;
+      temas.forEach(t => {
+        (t.itens || []).forEach(it => { if (it.problema) totalProblems++; });
+      });
+
+      if (totalProblems > 0) {
+        countLbl.style.color = '#dc2626';
+        countLbl.textContent = `⚠️ ${totalProblems} problema(s) detetado(s)`;
+      } else {
+        countLbl.style.color = '#166534';
+        countLbl.textContent = `✅ Tudo conforme`;
+      }
+
+      if (temas.length === 0) {
+        cont.innerHTML = `
+          <div class="info-row ok">
+            <span class="info-label">Estado Geral</span>
+            <span class="info-val">Sem registos ou incumprimentos para esta instalação.</span>
+          </div>`;
+        return;
+      }
+
+      cont.innerHTML = temas.map(t => {
+        const itens = t.itens || [];
+        const hasProb = itens.some(it => it.problema);
+        const probCount = itens.filter(it => it.problema).length;
+        return `
+          <div class="theme-group ${hasProb ? 'has-problem' : ''}">
+            <div class="theme-header">
+              <span>${escapeHtml(t.tema)}</span>
+              <span class="theme-badge ${hasProb ? 'problem' : ''}">
+                ${hasProb ? `${probCount} com problema` : 'Conforme / Info'}
+              </span>
+            </div>
+            <div class="theme-items">
+              ${itens.map(it => `
+                <div class="info-row ${it.problema ? 'problem' : 'ok'}">
+                  <span class="info-label">${escapeHtml(it.label)}</span>
+                  <span class="info-val">${escapeHtml(it.valor || '—')}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function mapCategoryToTheme(cat) {
+      const c = normalizarTexto(cat);
+      if (c.includes('certificado') || c.includes('ce')) return 'Certificado Energético (CE)';
+      if (c.includes('pmp') || c.includes('manutencao') || c.includes('consumo') || c.includes('rm') || c.includes('rc')) return 'Manutenção e Consumos (PMP / RM / RC)';
+      if (c.includes('qai') || c.includes('asa')) return 'Qualidade do Ar Interior (QAI / ASA)';
+      if (c.includes('radao')) return 'Exposição ao Radão';
+      if (c.includes('legionella')) return 'Prevenção de Legionella';
+      if (c.includes('fuga') || c.includes('fgas')) return 'Deteção de Fugas (Gases Fluorados)';
+      if (c.includes('tis') || c.includes('inspec') || c.includes('equipamento')) return 'Inspeções a Sistemas Técnicos (TIS)';
+      return cat;
+    }
+
+    function detectIsProblem(msg) {
+      const m = normalizarTexto(msg);
+      if (!m || m === '-' || m === 'n/a' || m === 'pes' || m.includes('conforme') && !m.includes('nao conforme')) return false;
+      return m.includes('falta') || m.includes('expirad') || m.includes('vencid') || m.includes('nao') || m.includes('sem ') || m.includes('pendente') || m.includes('acima');
+    }
+
+    /* Tabela Estado de Conservação (Evidências) */
+    function renderConservacaoTable() {
+      const tbody = document.getElementById('conservacaoBody');
+      if (!tbody) return;
+      tbody.innerHTML = conservacaoRows.map((row, idx) => `
+        <tr>
+          <td>
+            <div class="cons-sys-name">${escapeHtml(row.sistema)}</div>
+          </td>
+          <td>
+            <div class="cons-emp-wrap">
+              <span class="no-desktop-lbl" style="display:none;">Empresa:</span>
+              <input type="text" class="cons-emp-input" value="${escapeAttr(row.empresa)}" placeholder="Ex: CME / N/A..." oninput="updateConservacaoEmpresa(${idx}, this.value)" />
+            </div>
+          </td>
+          <td>
+            <div class="dots-picker">
+              ${ESTADOS_CONSERVACAO.map(st => {
+                const isSel = row.estado === st.id;
+                return `
+                  <button type="button"
+                    class="dot-btn ${isSel ? 'selected' : ''}"
+                    title="${st.label}"
+                    aria-label="${st.label}"
+                    onclick="setConservacaoEstado(${idx}, '${st.id}')">
+                    ${st.type === 'star'
+                      ? `<span class="dot-star" style="color:${isSel ? '#1e293b' : st.color};">★</span>`
+                      : `<span class="dot-circle" style="background:${st.color};"></span>`
+                    }
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateConservacaoEmpresa(idx, val) {
+      if (!conservacaoRows[idx]) return;
+      conservacaoRows[idx].empresa = val;
+      saveLocalState();
+    }
+
+    function setConservacaoEstado(idx, estadoId) {
+      if (!conservacaoRows[idx]) return;
+      conservacaoRows[idx].estado = (conservacaoRows[idx].estado === estadoId) ? '' : estadoId;
+      renderConservacaoTable();
+      saveLocalState();
+    }
+
+    function applyTempPhotosForCurrentStore() {
+      const storeName = (document.getElementById('manualStoreName').value || '').trim();
+      if (!window.LMSI_FOTOS_TEMP || !storeName) return;
+
+      let tempList = window.LMSI_FOTOS_TEMP[storeName];
+      if (!Array.isArray(tempList)) {
+        const alvo = normalizarNomeEdif(storeName);
+        for (const chave of Object.keys(window.LMSI_FOTOS_TEMP)) {
+          if (normalizarNomeEdif(chave) === alvo && Array.isArray(window.LMSI_FOTOS_TEMP[chave])) {
+            tempList = window.LMSI_FOTOS_TEMP[chave];
+            break;
+          }
+        }
+      }
+
+      if (!Array.isArray(tempList) || tempList.length === 0) return;
+
+      const novosItens = tempList.map(item => ({
+        id: Date.now() + Math.random(),
+        eq: item.eq || item.nome || '',
+        anomalia: item.anomalia || '',
+        acao: item.acao || '',
+        foto: item.foto || '',
+        estado: item.estado || 'Não Resolvido'
+      })).filter(it => it.eq || it.anomalia || it.acao || it.foto);
+
+      if (novosItens.length > 0) {
+        const jaTemDadosManuais = anexoRows.some(r => r.eq || r.anomalia || r.acao || r.foto);
+        if (!jaTemDadosManuais) {
+          anexoRows = novosItens;
+        } else {
+          novosItens.forEach(ni => {
+            const duplicado = anexoRows.some(r =>
+              (ni.foto && r.foto === ni.foto) ||
+              (!ni.foto && r.eq === ni.eq && r.anomalia === ni.anomalia)
+            );
+            if (!duplicado) anexoRows.push(ni);
+          });
+        }
+      }
+    }
+
+    /* Leitura local de Excel/JSON (caso seja usado manualmente) */
+    function handleExcelOrJsonUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.name.toLowerCase().endsWith('.json')) {
+        const rJson = new FileReader();
+        rJson.onload = (evt) => {
+          try {
+            const parsed = JSON.parse(evt.target.result);
+            if (Array.isArray(parsed)) populateStoresDropdown(parsed, file.name);
+          } catch (err) {
+            alert('Erro ao ler JSON: ' + err.message);
+          }
+        };
+        rJson.readAsText(file, 'utf-8');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const wb = XLSX.read(data, { type: 'array', cellDates: true });
+          const sheetName = wb.SheetNames.find(n => n.toLowerCase().includes('sheet') || n.toLowerCase().includes('cbre')) || wb.SheetNames[0];
+          const ws = wb.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          parseExcelRows(rows, file.name);
+        } catch (err) {
+          alert('Erro ao ler Excel: ' + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function parseExcelRows(rows, fileName) {
+      const list = [];
+      const h1 = rows[0] || [];
+      const h2 = rows[1] || [];
+      for (let r = 2; r < rows.length; r++) {
+        const row = rows[r];
+        if (!row) continue;
+        let emp = String(row[0] || '').trim();
+        let edif = String(row[1] || '').trim();
+        if (!edif || edif.toLowerCase().includes('email')) {
+          emp = String(row[1] || '').trim();
+          edif = String(row[2] || '').trim();
+        }
+        if (!edif) continue;
+        list.push({ rowIndex: r + 1, emp, edif, needs: computeRowNeeds(row, h1, h2) });
+      }
+      populateStoresDropdown(list, fileName);
+    }
+
+    function computeRowNeeds(row, h1, h2) {
+      const list = [];
+      const today = new Date();
+      for (let c = 0; c < h2.length; c++) {
+        const colName = String(h2[c] || '').trim().toLowerCase();
+        const val = row[c];
+        const txt = formatCellVal(val);
+
+        if (colName === 'certificado energético' || colName === 'número') {
+          const exp = row[c + 1];
+          if (!txt || txt.toUpperCase() === 'NÃO' || txt.toUpperCase() === 'PES') {
+            list.push({ tema: 'Certificado Energético (CE)', label: 'Número CE', valor: `Em falta / Não disponível (${txt || 'Vazio'})`, problema: true });
+          } else if (exp instanceof Date && exp < today) {
+            list.push({ tema: 'Certificado Energético (CE)', label: `CE ${txt}`, valor: `Expirado a ${formatCellVal(exp)}`, problema: true });
+          } else {
+            list.push({ tema: 'Certificado Energético (CE)', label: `CE ${txt}`, valor: exp instanceof Date ? `Válido até ${formatCellVal(exp)}` : 'Conforme', problema: false });
+          }
+        }
+        if (colName.includes('plano de manutenção') || colName === 'plano manutenção') {
+          const prob = !txt || txt.toLowerCase().includes('não') || txt.toLowerCase().includes('sem');
+          list.push({ tema: 'Manutenção e Consumos (PMP / RM / RC)', label: 'Plano de Manutenção (PMP)', valor: txt || 'Em falta', problema: prob });
+        }
+        if (colName.includes('registos de manutenção') || colName === 'registos manutenção') {
+          const prob = !txt || txt.toLowerCase().includes('sem') || txt.toLowerCase().includes('não');
+          list.push({ tema: 'Manutenção e Consumos (PMP / RM / RC)', label: 'Registos Manutenção (RM)', valor: txt || 'Em falta', problema: prob });
+        }
+        if (colName.includes('registos de consumo') || colName === 'registos consumo') {
+          const prob = !txt || txt.toLowerCase().includes('sem') || txt.toLowerCase().includes('não');
+          list.push({ tema: 'Manutenção e Consumos (PMP / RM / RC)', label: 'Registos Consumo (RC)', valor: txt || 'Em falta', problema: prob });
+        }
+        if (colName === 'qai conforme' || colName === 'qai') {
+          const prob = txt.toLowerCase().includes('não');
+          list.push({ tema: 'Qualidade do Ar Interior (QAI / ASA)', label: 'QAI', valor: txt || 'Não aplicável / Sem registo', problema: prob });
+        }
+        if (colName === 'radão conforme' || colName === 'radão') {
+          const prob = txt.toLowerCase().includes('não');
+          list.push({ tema: 'Exposição ao Radão', label: 'Radão', valor: txt || 'Sem registo', problema: prob });
+        }
+        if (colName === 'equipamento' && txt && txt !== '-') {
+          for (let k = c + 1; k <= c + 8 && k < row.length; k++) {
+            const subH = String(h2[k] || '').toLowerCase();
+            if (subH.includes('limite') || subH.includes('próxim')) {
+              const dtLim = row[k];
+              if (dtLim instanceof Date) {
+                const vencido = dtLim < today;
+                list.push({
+                  tema: 'Equipamentos e Inspeções',
+                  label: txt,
+                  valor: vencido ? `Inspeção vencida a ${formatCellVal(dtLim)}` : `Próxima inspeção até ${formatCellVal(dtLim)}`,
+                  problema: vencido
+                });
+              }
+            }
+          }
+        }
+      }
+      return list;
+    }
+
+    function formatCellVal(v) {
+      if (v === null || v === undefined) return '';
+      if (v instanceof Date) return v.toLocaleDateString('pt-PT');
+      return String(v).trim();
+    }
+
+    /* Leitura manual de .docx caso necessário */
+    async function handleWordUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      document.getElementById('secOldWord').style.display = 'block';
+      const cont = document.getElementById('oldReportContainer');
+      cont.innerHTML = '<p style="font-size:13px;">A extrair tabela e fotografias do Anexo A do Word...</p>';
+
+      try {
+        const zip = await JSZip.loadAsync(file);
+        const docXml = await zip.file('word/document.xml').async('string');
+        const relsXml = zip.file('word/_rels/document.xml.rels')
+          ? await zip.file('word/_rels/document.xml.rels').async('string')
+          : '';
+
+        const relMap = {};
+        const relParser = new DOMParser();
+        if (relsXml) {
+          const relDoc = relParser.parseFromString(relsXml, 'application/xml');
+          Array.from(relDoc.getElementsByTagName('Relationship')).forEach(r => {
+            relMap[r.getAttribute('Id')] = r.getAttribute('Target');
+          });
+        }
+
+        const xmlDoc = relParser.parseFromString(docXml, 'application/xml');
+        const tables = Array.from(xmlDoc.getElementsByTagName('w:tbl'));
+        oldAnexoItems = [];
+
+        for (const tbl of tables) {
+          const fullText = tbl.textContent || '';
+          if (fullText.toLowerCase().includes('equipamento') &&
+             (fullText.toLowerCase().includes('anomalia') || fullText.toLowerCase().includes('estado'))) {
+            const trs = Array.from(tbl.getElementsByTagName('w:tr'));
+            for (let i = 1; i < trs.length; i++) {
+              const tcs = Array.from(trs[i].getElementsByTagName('w:tc'));
+              if (tcs.length < 2) continue;
+              const eq = extractParagraphsText(tcs[0]);
+              const desc = extractParagraphsText(tcs[1]);
+              const estado = tcs[3] ? extractParagraphsText(tcs[3]) : 'Pendente';
+
+              let anomalia = desc, acao = '';
+              const pAcao = desc.search(/A[çc][ãa]o\s*:/i);
+              if (pAcao >= 0) {
+                anomalia = desc.substring(0, pAcao).replace(/Anomalia\s*:/i, '').trim();
+                acao = desc.substring(pAcao).replace(/A[çc][ãa]o\s*:/i, '').trim();
+              } else {
+                anomalia = desc.replace(/Anomalia\s*:/i, '').trim();
+              }
+
+              let fotoBase64 = '';
+              const blips = Array.from((tcs[2] || trs[i]).getElementsByTagName('a:blip'));
+              if (blips.length > 0) {
+                const rId = blips[0].getAttribute('r:embed');
+                if (rId && relMap[rId]) {
+                  const imgPath = 'word/' + relMap[rId].replace(/^\/+/, '');
+                  const imgFile = zip.file(imgPath);
+                  if (imgFile) {
+                    const b64 = await imgFile.async('base64');
+                    const ext = imgPath.split('.').pop().toLowerCase();
+                    const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+                    fotoBase64 = `data:${mime};base64,${b64}`;
+                  }
+                }
+              }
+
+              if (eq || anomalia || fotoBase64) {
+                oldAnexoItems.push({ eq, anomalia, acao, estado, foto: fotoBase64 });
+              }
+            }
+            break;
+          }
+        }
+        renderOldReportItems(file.name);
+        switchPage('evidencias');
+      } catch (err) {
+        cont.innerHTML = `<p style="color:var(--danger); font-size:13px;">Erro ao ler Word: ${err.message}</p>`;
+      }
+    }
+
+    function extractParagraphsText(tcNode) {
+      const ps = Array.from(tcNode.getElementsByTagName('w:p'));
+      return ps.map(p => p.textContent.trim()).filter(Boolean).join('
+');
+    }
+
+    function renderOldReportItems(fileName) {
+      const cont = document.getElementById('oldReportContainer');
+      if (oldAnexoItems.length === 0) {
+        cont.innerHTML = `<p style="font-size:13px; color:var(--muted);">Nenhuma tabela de Anexo A encontrada em <b>${escapeHtml(fileName)}</b>.</p>`;
+        return;
+      }
+      cont.innerHTML = oldAnexoItems.map((it, idx) => `
+        <div class="old-item">
+          <div>
+            ${it.foto ? `<img src="${it.foto}" alt="Foto Antiga" />` : `<div style="width:100px;height:85px;background:#e2e8f0;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#64748b;">Sem Foto</div>`}
+          </div>
+          <div>
+            <div style="font-weight:700; color:var(--primary); margin-bottom:4px;">${escapeHtml(it.eq || 'Equipamento s/ nome')} <span style="font-size:11px; color:var(--muted);">(${escapeHtml(it.estado)})</span></div>
+            <div style="font-size:12px; margin-bottom:4px;"><b>Anomalia:</b> ${escapeHtml(it.anomalia)}</div>
+            <div style="font-size:12px; margin-bottom:8px;"><b>Ação:</b> ${escapeHtml(it.acao)}</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="btn btn-amber" style="padding:6px 10px; font-size:12px;" onclick="sendOldToAnexo(${idx}, 'Não Resolvido')">Manter Pendente no Anexo A</button>
+              <button class="btn btn-green" style="padding:6px 10px; font-size:12px;" onclick="sendOldToAnexo(${idx}, 'Resolvido')">✅ Já Resolvido</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function sendOldToAnexo(idx, novoEstado) {
+      const it = oldAnexoItems[idx];
+      if (!it) return;
+      const emptyRow = anexoRows.find(r => !r.eq && !r.anomalia && !r.foto);
+      if (emptyRow) {
+        emptyRow.eq = it.eq;
+        emptyRow.anomalia = it.anomalia;
+        emptyRow.acao = it.acao;
+        emptyRow.foto = it.foto;
+        emptyRow.estado = novoEstado;
+      } else {
+        anexoRows.push({
+          id: Date.now() + Math.random(),
+          eq: it.eq,
+          anomalia: it.anomalia,
+          acao: it.acao,
+          foto: it.foto,
+          estado: novoEstado
+        });
+      }
+      renderAnexoRows();
+      saveLocalState();
+    }
+
+    function passAllOldToAnexo() {
+      if (!oldAnexoItems.length) return;
+      oldAnexoItems.forEach((_, idx) => sendOldToAnexo(idx, 'Não Resolvido'));
+    }
+
+    /* Tabela Anexo A */
+    function renderAnexoRows() {
+      const tbody = document.getElementById('anexoBody');
+      tbody.innerHTML = anexoRows.map((row, i) => `
+        <tr>
+          <td>
+            <label class="field-lbl">Equipamento</label>
+            <input type="text" value="${escapeAttr(row.eq)}" placeholder="Ex: UTA 1 / Quadro..." oninput="updateRow(${i}, 'eq', this.value)" />
+            <div class="no-print" style="margin-top:8px;">
+              <button class="btn btn-danger" style="padding:5px 9px; font-size:11px;" onclick="removeAnexoRow(${i})">🗑️ Apagar</button>
+            </div>
+          </td>
+          <td>
+            <div class="desc-label">
+              <span>Anomalia:</span>
+              <button class="btn btn-outline no-print" style="padding:3px 8px; font-size:11px;" onclick="startVoice(${i}, 'anomalia')">🎙️ Ditar</button>
+            </div>
+            <textarea placeholder="Descreve a anomalia..." oninput="updateRow(${i}, 'anomalia', this.value)">${escapeHtml(row.anomalia)}</textarea>
+            <div class="desc-label" style="margin-top:8px;">
+              <span>Ação:</span>
+              <button class="btn btn-outline no-print" style="padding:3px 8px; font-size:11px;" onclick="startVoice(${i}, 'acao')">🎙️ Ditar</button>
+            </div>
+            <textarea placeholder="Descreve a ação recomendada..." oninput="updateRow(${i}, 'acao', this.value)">${escapeHtml(row.acao)}</textarea>
+          </td>
+          <td>
+            <div class="photo-box">
+              ${row.foto
+                ? `<img src="${row.foto}" class="photo-preview" />`
+                : `<div class="photo-preview" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">Sem fotografia</div>`
+              }
+              <div class="no-print" style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
+                <label class="btn btn-green" style="padding:7px 11px; font-size:12px;">
+                  📷 Câmara / Foto
+                  <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handleRowPhoto(event, ${i})" />
+                </label>
+                <label class="btn btn-outline" style="padding:7px 11px; font-size:12px;">
+                  🖼️ Galeria
+                  <input type="file" accept="image/*" style="display:none" onchange="handleRowPhoto(event, ${i})" />
+                </label>
+              </div>
+            </div>
+          </td>
+          <td>
+            <label class="field-lbl">Estado</label>
+            <select onchange="updateRow(${i}, 'estado', this.value)">
+              <option value="Não Resolvido" ${row.estado === 'Não Resolvido' ? 'selected' : ''}>Não Resolvido</option>
+              <option value="Resolvido" ${row.estado === 'Resolvido' ? 'selected' : ''}>Resolvido</option>
+              <option value="Em Curso" ${row.estado === 'Em Curso' ? 'selected' : ''}>Em Curso</option>
+              <option value="Informativo / OK" ${row.estado === 'Informativo / OK' ? 'selected' : ''}>Informativo / OK</option>
+            </select>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateRow(idx, field, val) {
+      if (!anexoRows[idx]) return;
+      anexoRows[idx][field] = val;
+      saveLocalState();
+    }
+
+    function addAnexoRow() {
+      anexoRows.push({ id: Date.now(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' });
+      renderAnexoRows();
+      saveLocalState();
+    }
+
+    function removeAnexoRow(idx) {
+      if (anexoRows.length <= 1) {
+        anexoRows[0] = { id: Date.now(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' };
+      } else {
+        anexoRows.splice(idx, 1);
+      }
+      renderAnexoRows();
+      saveLocalState();
+    }
+
+    function handleRowPhoto(e, idx) {
+      const file = e.target.files[0];
+      if (!file) return;
+      compressImage(file, 850, 0.72, (dataUrl) => {
+        anexoRows[idx].foto = dataUrl;
+        renderAnexoRows();
+        saveLocalState();
+      });
+    }
+
+    function quickCameraRow() {
+      document.getElementById('quickCamInput').click();
+    }
+
+    function handleQuickCam(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      compressImage(file, 850, 0.72, (dataUrl) => {
+        const emptyRow = anexoRows.find(r => !r.foto && !r.eq && !r.anomalia);
+        if (emptyRow) {
+          emptyRow.foto = dataUrl;
+        } else {
+          anexoRows.push({ id: Date.now(), eq: '', anomalia: '', acao: '', foto: dataUrl, estado: 'Não Resolvido' });
+        }
+        renderAnexoRows();
+        saveLocalState();
+        const sec = document.getElementById('secAnexoA');
+        if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    function compressImage(file, maxW, quality, callback) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = function() {
+          let w = img.width, h = img.height;
+          if (w > maxW) { h = Math.round(h * (maxW / w)); w = maxW; }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          callback(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function startVoice(idx, field) {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) return alert('O teu navegador não suporta ditado por voz direto. Usa o microfone do teclado do telemóvel.');
+      const rec = new SpeechRec();
+      rec.lang = 'pt-PT';
+      rec.interimResults = false;
+      rec.onresult = (e) => {
+        const txt = e.results[0][0].transcript;
+        anexoRows[idx][field] = (anexoRows[idx][field] ? anexoRows[idx][field] + ' ' : '') + txt;
+        renderAnexoRows();
+        saveLocalState();
+      };
+      rec.start();
+    }
+
+    function startVoiceNotes() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) return alert('O teu navegador não suporta ditado por voz direto. Usa o microfone do teclado do telemóvel.');
+      const rec = new SpeechRec();
+      rec.lang = 'pt-PT';
+      rec.interimResults = false;
+      rec.onresult = (e) => {
+        const txt = e.results[0][0].transcript;
+        const el = document.getElementById('auditorNotesInput');
+        el.value = (el.value ? el.value + '
+' : '') + txt;
+        saveLocalState();
+      };
+      rec.start();
+    }
+
+    async function exportVisitPackage() {
+      saveCurrentStoreDraft();
+      const storeName = (document.getElementById('manualStoreName').value || 'Visita_LMSI').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const techSlug = slugifyTech(currentTech);
+      const dt = document.getElementById('visitDate').value || new Date().toISOString().slice(0, 10);
+      const payload = {
+        auditor: currentTech,
+        technician: currentTech,
+        storeName: document.getElementById('manualStoreName').value,
+        visitDate: dt,
+        conservacaoRows,
+        anexoRows,
+        auditorNotes: document.getElementById('auditorNotesInput').value || '',
+        allStoresToday: visitsByStore,
+        savedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const fileName = `Visita_${storeName}_${techSlug}_${dt}.json`;
+
+      if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'application/json' })] })) {
+        try {
+          await navigator.share({
+            title: fileName,
+            text: `Pacote de Visita Técnica LMSI (${currentTech})`,
+            files: [new File([blob], fileName, { type: 'application/json' })]
+          });
+          return;
+        } catch (_) {}
+      }
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName;
+      a.click();
+    }
+
+    function importVisitPackage(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const data = JSON.parse(evt.target.result);
+          if (data.storeName) document.getElementById('manualStoreName').value = data.storeName;
+          if (data.visitDate) document.getElementById('visitDate').value = data.visitDate;
+          if (Array.isArray(data.conservacaoRows)) {
+            conservacaoRows = data.conservacaoRows;
+            renderConservacaoTable();
+          }
+          if (Array.isArray(data.anexoRows)) {
+            anexoRows = data.anexoRows;
+            renderAnexoRows();
+          }
+          if (typeof data.auditorNotes === 'string') {
+            auditorNotes = data.auditorNotes;
+            document.getElementById('auditorNotesInput').value = auditorNotes;
+          }
+          if (data.allStoresToday && typeof data.allStoresToday === 'object') {
+            visitsByStore = Object.assign({}, visitsByStore, data.allStoresToday);
+            updateRondaCounter();
+          }
+          saveLocalState();
+          alert('Visita carregada com sucesso!');
+        } catch (err) {
+          alert('Ficheiro de visita inválido: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    async function copyTableForWord() {
+      let html = `
+        <table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse; width:100%; font-family:Calibri, Arial, sans-serif; font-size:11pt;">
+          <thead>
+            <tr style="background-color:#7F7F7F; color:#FFFFFF; font-weight:bold; text-align:center;">
+              <th style="width:18%;">Equipamento</th>
+              <th style="width:38%;">Descrição</th>
+              <th style="width:28%;">Foto</th>
+              <th style="width:16%;">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      anexoRows.forEach(r => {
+        if (!r.eq && !r.anomalia && !r.acao && !r.foto) return;
+        html += `
+          <tr>
+            <td style="vertical-align:top;">${escapeHtml(r.eq)}</td>
+            <td style="vertical-align:top;">
+              <b>Anomalia:</b><br/>${escapeHtml(r.anomalia).replace(/
+/g, '<br/>')}<br/><br/>
+              <b>Ação:</b><br/>${escapeHtml(r.acao).replace(/
+/g, '<br/>')}
+            </td>
+            <td style="text-align:center; vertical-align:middle;">
+              ${r.foto ? `<img src="${r.foto}" width="190" style="max-width:190px; height:auto;" />` : ''}
+            </td>
+            <td style="text-align:center; vertical-align:middle;">${escapeHtml(r.estado)}</td>
+          </tr>
+        `;
+      });
+      html += `</tbody></table>`;
+
+      try {
+        const blobHtml = new Blob([html], { type: 'text/html' });
+        const blobText = new Blob([html.replace(/<[^>]+>/g, ' ')], { type: 'text/plain' });
+        await navigator.clipboard.write([new ClipboardItem({ 'text/html': blobHtml, 'text/plain': blobText })]);
+        alert('Tabela do Anexo A copiada! Abre o teu relatório Word e faz Ctrl + V (Colar).');
+      } catch (err) {
+        alert('Não foi possível copiar automaticamente: ' + err.message);
+      }
+    }
+
+    function saveLocalState() {
+      saveCurrentStoreDraft();
+      if (!currentTech) return;
+      try {
+        localStorage.setItem(getStorageKey(), JSON.stringify({
+          storeName: document.getElementById('manualStoreName').value,
+          visitDate: document.getElementById('visitDate').value,
+          conservacaoRows,
+          anexoRows,
+          auditorNotes: document.getElementById('auditorNotesInput').value || '',
+          visitsByStore
+        }));
+      } catch (_) {}
+    }
+
+    function loadLocalState() {
+      if (!currentTech) return;
+      try {
+        const raw = localStorage.getItem(getStorageKey());
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (data.storeName) document.getElementById('manualStoreName').value = data.storeName;
+        if (data.visitDate) document.getElementById('visitDate').value = data.visitDate;
+        if (data.visitsByStore && typeof data.visitsByStore === 'object') visitsByStore = data.visitsByStore;
+        if (Array.isArray(data.conservacaoRows) && data.conservacaoRows.length) conservacaoRows = data.conservacaoRows;
+        if (Array.isArray(data.anexoRows) && data.anexoRows.length) anexoRows = data.anexoRows;
+        if (typeof data.auditorNotes === 'string') {
+          auditorNotes = data.auditorNotes;
+          document.getElementById('auditorNotesInput').value = auditorNotes;
+        }
+      } catch (_) {}
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function escapeAttr(s) {
+      return escapeHtml(s).replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
