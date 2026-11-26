@@ -535,6 +535,7 @@
     let filteredStoreIndices = [];
     let visitsByStore = {};
     let currentTemasEditaveis = [];
+    let storageQuotaWarningShown = false;
 
     let conservacaoRows = createDefaultConservacao();
     function createDefaultAnexoRows() {
@@ -666,6 +667,7 @@
 
     function initTechnicianSession(tech) {
       currentTech = tech;
+      storageQuotaWarningShown = false;
       const slug = slugifyTech(tech);
       window.LMSI_DATA_B64 = null;
       window.LMSI_FOTOS_TEMP = null;
@@ -1249,7 +1251,7 @@
     function handleRowPhoto(e, idx) {
       const file = e.target.files[0];
       if (!file) return;
-      compressImage(file, 850, 0.72, (dataUrl) => {
+      compressImage(file, 750, 0.65, (dataUrl) => {
         anexoRows[idx].foto = dataUrl;
         renderAnexoRows();
         saveLocalState();
@@ -1263,7 +1265,7 @@
     function handleQuickCam(e) {
       const file = e.target.files[0];
       if (!file) return;
-      compressImage(file, 850, 0.72, (dataUrl) => {
+      compressImage(file, 750, 0.65, (dataUrl) => {
         const emptyRow = anexoRows.find(r => !r.foto && !r.eq && !r.anomalia);
         if (emptyRow) {
           emptyRow.foto = dataUrl;
@@ -1352,7 +1354,12 @@
           auditorNotes: document.getElementById('auditorNotesInput').value || '',
           visitsByStore
         }));
-      } catch (_) {}
+      } catch (err) {
+        if (!storageQuotaWarningShown) {
+          storageQuotaWarningShown = true;
+          alert('Aviso: o armazenamento local do navegador atingiu o limite de espaço devido ao tamanho das fotos. Os dados continuam em memória para exportar o JSON, mas recomenda-se guardar a visita agora.');
+        }
+      }
     }
 
     function loadLocalState() {
