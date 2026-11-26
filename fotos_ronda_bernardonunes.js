@@ -1,2 +1,2 @@
 // Fotos Anexo A - Auditor: Bernardo Nunes
-window.LMSI_FOTOS_TEMP = {"\tARMAZÉNS CASAL SARAMAGO":[{"eq":"B","anomalia":"Central de Deteção de Incêndio\n","acao":"","estado":"Não Resolvido","foto":""}]};
+window.LMSI_FOTOS_TEMP = {"Lugar de Casal Pinheiro - Vilanova":[{"eq":"VRV","anomalia":"Isolamento das tubagens de cobre danificado.\n","acao":"Remendar o isolamento.\n","estado":"Novo","foto":""},{"eq":"Sistemas de Expansão Direta","anomalia":"As unidades exteriores apresentam bastante sujidade.\n","acao":"Proceder à limpeza dos equipamentos.\n","estado":"Novo","foto":""}]};
