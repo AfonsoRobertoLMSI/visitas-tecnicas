@@ -1233,14 +1233,14 @@
     }
 
     function addAnexoRow() {
-      anexoRows.push({ id: Date.now(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' });
+      anexoRows.push({ id: Date.now() + Math.random(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' });
       renderAnexoRows();
       saveLocalState();
     }
 
     function removeAnexoRow(idx) {
       if (anexoRows.length <= 1) {
-        anexoRows[0] = { id: Date.now(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' };
+        anexoRows[0] = { id: Date.now() + Math.random(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' };
       } else {
         anexoRows.splice(idx, 1);
       }
@@ -1249,10 +1249,10 @@
     }
 
     function handleRowPhoto(e, idx) {
-      const file = e.target.files[0];
-      if (!file) return;
-      compressImage(file, 750, 0.65, (dataUrl) => {
-        anexoRows[idx].foto = dataUrl;
+      const file = e.target.files && e.target.files[0];
+      if (!file || !anexoRows[idx]) return;
+      compressImage(file, 680, 0.60, (dataUrl) => {
+        anexoRows[idx].foto = dataUrl || '';
         renderAnexoRows();
         saveLocalState();
       });
@@ -1263,14 +1263,14 @@
     }
 
     function handleQuickCam(e) {
-      const file = e.target.files[0];
+      const file = e.target.files && e.target.files[0];
       if (!file) return;
-      compressImage(file, 750, 0.65, (dataUrl) => {
-        const emptyRow = anexoRows.find(r => !r.foto && !r.eq && !r.anomalia);
+      compressImage(file, 680, 0.60, (dataUrl) => {
+        const emptyRow = anexoRows.find(r => !r.foto && !r.eq && !r.anomalia && !r.acao);
         if (emptyRow) {
-          emptyRow.foto = dataUrl;
+          emptyRow.foto = dataUrl || '';
         } else {
-          anexoRows.push({ id: Date.now(), eq: '', anomalia: '', acao: '', foto: dataUrl, estado: 'Não Resolvido' });
+          anexoRows.push({ id: Date.now() + Math.random(), eq: '', anomalia: '', acao: '', foto: dataUrl || '', estado: 'Não Resolvido' });
         }
         renderAnexoRows();
         saveLocalState();
@@ -1292,7 +1292,13 @@
           ctx.drawImage(img, 0, 0, w, h);
           callback(canvas.toDataURL('image/jpeg', quality));
         };
+        img.onerror = function() {
+          callback(typeof evt.target.result === 'string' ? evt.target.result : '');
+        };
         img.src = evt.target.result;
+      };
+      reader.onerror = function() {
+        callback('');
       };
       reader.readAsDataURL(file);
     }
@@ -1302,6 +1308,16 @@
       const storeName = (getCurrentStoreName() || 'Visita_LMSI').replace(/[^a-zA-Z0-9_-]/g, '_');
       const techSlug = slugifyTech(currentTech);
       const dt = document.getElementById('visitDate').value || new Date().toISOString().slice(0, 10);
+      const cleanAnexoRows = anexoRows.map(r => ({
+        id: r.id || Date.now() + Math.random(),
+        eq: r.eq || '',
+        anomalia: r.anomalia || '',
+        acao: r.acao || '',
+        foto: r.foto || '',
+        estado: r.estado || 'Não Resolvido'
+      }));
+      const fotosCount = cleanAnexoRows.filter(r => r.foto && String(r.foto).trim() !== '').length;
+
       const payload = {
         auditor: currentTech,
         technician: currentTech,
@@ -1309,7 +1325,7 @@
         visitDate: dt,
         temasEditaveis: currentTemasEditaveis,
         conservacaoRows,
-        anexoRows,
+        anexoRows: cleanAnexoRows,
         auditorNotes: document.getElementById('auditorNotesInput').value || '',
         allStoresToday: visitsByStore,
         savedAt: new Date().toISOString()
@@ -1322,7 +1338,7 @@
         try {
           await navigator.share({
             title: fileName,
-            text: `Pacote de Visita Técnica LMSI (${currentTech})`,
+            text: `Pacote de Visita Técnica LMSI (${currentTech}) — ${fotosCount} foto(s) no Anexo A`,
             files: [file]
           });
           return;
@@ -1339,6 +1355,7 @@
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 1000);
+      alert(`JSON guardado (${cleanAnexoRows.length} linha(s) e ${fotosCount} foto(s) no Anexo A).`);
     }
 
     function saveLocalState() {
