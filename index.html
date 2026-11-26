@@ -32,6 +32,7 @@
       padding-bottom: 84px;
     }
 
+    /* Ecra de bloqueio / Auditor */
     #pinOverlay {
       position: fixed; inset: 0; background: linear-gradient(135deg, #143554, #1f4e79);
       z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;
@@ -48,26 +49,29 @@
       background: #fff;
     }
 
+    /* Barra Superior numa linha */
     header {
-      background: var(--primary); color: #fff; padding: 11px 14px;
+      background: var(--primary); color: #fff; padding: 10px 14px;
       position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
-    .header-top {
-      display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+    .header-single-line {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      flex-wrap: nowrap; overflow-x: auto;
     }
-    .brand { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .badge-sync {
-      font-size: 11px; padding: 4px 9px; border-radius: 999px; background: rgba(255,255,255,0.18);
-      font-weight: 600;
+    .ronda-top-label {
+      font-size: 14px; font-weight: 700; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
     }
-    .btn-switch-auditor {
+    .header-btns {
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    }
+    .btn-header-light {
       background: #ffffff; color: var(--primary); border: none; border-radius: 8px;
-      padding: 6px 11px; font-size: 12px; font-weight: 700; cursor: pointer;
+      padding: 7px 11px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
     }
-    .btn-save-visit-top {
+    .btn-header-save {
       background: #e67e22; color: #ffffff; border: none; border-radius: 8px;
-      padding: 6px 11px; font-size: 12px; font-weight: 700; cursor: pointer;
-      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 12px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
     }
 
     .btn {
@@ -83,6 +87,7 @@
     .btn-teal { background: #2a7b88; color: #fff; }
     .btn-outline { background: #fff; color: var(--primary); border: 1px solid var(--border); }
     .btn-danger { background: #c82333; color: #fff; }
+    .btn-xs { padding: 4px 8px; font-size: 11px; border-radius: 6px; }
 
     .container { max-width: 1180px; margin: 12px auto; padding: 0 12px; }
     .card {
@@ -94,6 +99,7 @@
       display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
     }
 
+    /* Selecao Empresa -> Edificio (com pesquisa na dropdown) -> Data -> Proxima Visita */
     .main-selector-row {
       display: grid; grid-template-columns: 1fr 1.35fr 155px auto; gap: 10px; align-items: end;
     }
@@ -151,17 +157,21 @@
     }
     textarea { resize: vertical; min-height: 62px; }
 
+    /* Paginas (Obrigatoriedades Legais vs Evidencias) */
     .page-view { display: none; }
     .page-view.active { display: block; }
 
+    /* Obrigatoriedades Legais por Tema */
     .theme-group {
       border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden;
       background: #fff;
     }
-    .theme-group.has-problem { border-color: #fca5a5; }
+    .theme-group.has-problem {
+      border-color: #fca5a5;
+    }
     .theme-header {
       background: #f8fafc; padding: 10px 12px; font-weight: 700; font-size: 13.5px;
-      color: var(--primary); display: flex; justify-content: space-between; align-items: center;
+      color: var(--primary); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
       border-bottom: 1px solid var(--border);
     }
     .theme-group.has-problem .theme-header {
@@ -171,20 +181,37 @@
       font-size: 11px; padding: 3px 8px; border-radius: 999px; font-weight: 700;
       background: #dcfce7; color: #166534;
     }
-    .theme-badge.problem { background: #fee2e2; color: #991b1b; }
-    .theme-items { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
-    .info-row {
-      display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+    .theme-badge.problem {
+      background: #fee2e2; color: #991b1b;
+    }
+    .theme-items {
+      padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .legal-edit-row {
+      display: grid; grid-template-columns: 190px 1fr auto; gap: 8px; align-items: center;
       padding: 8px 10px; border-radius: 8px; background: #f8fafc; border-left: 4px solid #94a3b8;
       font-size: 13px;
     }
-    .info-row.ok { background: #f0fdf4; border-left-color: var(--success); }
-    .info-row.problem { background: #fef2f2; border-left-color: #dc2626; color: #991b1b; }
-    .info-row.problem .info-label,
-    .info-row.problem .info-val { color: #b91c1c; font-weight: 700; }
-    .info-label { font-weight: 600; color: var(--muted); min-width: 120px; }
-    .info-val { text-align: right; color: var(--text); word-break: break-word; }
+    .legal-edit-row.ok {
+      background: #f0fdf4; border-left-color: var(--success);
+    }
+    .legal-edit-row.problem {
+      background: #fef2f2; border-left-color: #dc2626;
+    }
+    .legal-edit-input {
+      padding: 7px 9px !important; font-size: 13px !important; background: rgba(255,255,255,0.92) !important;
+    }
+    .legal-edit-row.problem .legal-edit-input {
+      color: #b91c1c; font-weight: 700;
+    }
+    .legal-row-actions {
+      display: flex; gap: 5px; align-items: center; flex-wrap: wrap;
+    }
+    @media (max-width: 720px) {
+      .legal-edit-row { grid-template-columns: 1fr; }
+    }
 
+    /* Tabela Estado de Conservacao (Evidencias) */
     .cons-intro { font-size: 13px; color: var(--text); margin: 0 0 10px; }
     .cons-table {
       width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden;
@@ -216,11 +243,19 @@
       border-color: #0f172a; background: #e2e8f0; transform: scale(1.08);
       box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.2);
     }
-    .dot-circle { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
-    .dot-star { font-size: 18px; line-height: 1; color: var(--grey-dot); display: inline-block; }
-    .cons-legend { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .dot-circle {
+      width: 16px; height: 16px; border-radius: 50%; display: inline-block;
+    }
+    .dot-star {
+      font-size: 18px; line-height: 1; color: var(--grey-dot); display: inline-block;
+    }
+    .cons-legend {
+      margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
+    }
     .cons-legend-title { font-weight: 800; font-size: 13px; margin-bottom: 8px; color: #000; }
-    .cons-legend-items { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; font-size: 12.5px; }
+    .cons-legend-items {
+      display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; font-size: 12.5px;
+    }
     .legend-item { display: inline-flex; align-items: center; gap: 6px; }
 
     @media (max-width: 680px) {
@@ -230,32 +265,41 @@
         border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px;
         padding: 10px; background: #fff !important;
       }
-      .cons-table td { border: none; padding: 4px 0; text-align: left !important; }
+      .cons-table td {
+        border: none; padding: 4px 0; text-align: left !important;
+      }
       .cons-sys-name { font-weight: 700; font-size: 14px; color: var(--primary); margin-bottom: 4px; }
       .cons-emp-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-      .cons-emp-wrap span { font-size: 12px; color: var(--muted); white-space: nowrap; }
       .cons-emp-input { text-align: left; }
       .dots-picker { justify-content: space-between; padding-top: 4px; }
       .dot-btn { width: 42px; height: 42px; }
     }
 
-    .old-item {
-      border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px;
-      display: grid; grid-template-columns: 100px 1fr; gap: 12px; align-items: start; background: #fafbfc;
+    /* Anexo A */
+    .anexo-header {
+      color: var(--teal); font-size: 17px; font-weight: 800; margin: 2px 0;
     }
-    .old-item img {
-      width: 100px; height: 85px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border);
-      background: #eee;
+    table.anexo-table {
+      width: 100%; border-collapse: collapse; background: #fff;
     }
-    .anexo-header { color: var(--teal); font-size: 17px; font-weight: 800; margin: 2px 0; }
-    table.anexo-table { width: 100%; border-collapse: collapse; background: #fff; }
     table.anexo-table th {
       background: #7f7f7f; color: #fff; font-weight: 700; font-size: 13px;
       padding: 10px; border: 1px solid #d0d0d0; text-align: center;
     }
-    table.anexo-table td { border: 1px solid #d0d0d0; padding: 10px; vertical-align: top; }
+    table.anexo-table td {
+      border: 1px solid #d0d0d0; padding: 10px; vertical-align: top;
+    }
+    .eq-input-large {
+      min-height: 48px !important;
+      padding: 11px 12px !important;
+      font-size: 14.5px !important;
+      line-height: 1.35 !important;
+      font-weight: 600;
+    }
     .desc-label { font-weight: 700; font-size: 12px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
-    .photo-box { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .photo-box {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
     .photo-preview {
       width: 180px; max-width: 100%; height: 135px; object-fit: contain;
       border: 1px dashed #94a3b8; border-radius: 8px; background: #f8fafc;
@@ -273,6 +317,7 @@
       .photo-preview { width: 100%; height: 190px; }
     }
 
+    /* Navegacao Inferior (2 Paginas) */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
       background: #fff; border-top: 1px solid var(--border);
@@ -294,17 +339,11 @@
       padding: 13px 17px; font-size: 13.5px; font-weight: 700;
       box-shadow: 0 6px 16px rgba(0,0,0,0.25); cursor: pointer;
     }
-
-    @media print {
-      header, .bottom-nav, .fab-camera, .no-print { display: none !important; }
-      body { background: #fff; padding: 0; }
-      .card { border: none; box-shadow: none; padding: 0; }
-      .page-view { display: block !important; }
-    }
   </style>
 </head>
 <body>
 
+  <!-- Ecra de Selecao de Auditor -->
   <div id="pinOverlay" style="display:flex;">
     <div class="pin-card">
       <h2>🔒 Visitas Técnicas LMSI</h2>
@@ -323,21 +362,19 @@
     </div>
   </div>
 
+  <!-- Barra Superior numa linha -->
   <header>
-    <div class="header-top">
-      <div class="brand">
-        <span>🏢 Visitas LMSI</span>
-        <span class="badge-sync" id="techBadge">Auditor: —</span>
-      </div>
-      <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-        <span class="badge-sync" id="syncStatus">A aguardar auditor...</span>
-        <button type="button" class="btn-save-visit-top" onclick="exportVisitPackage()">📤 Guardar Visita</button>
-        <button type="button" class="btn-switch-auditor" onclick="switchTechnician()">Trocar Auditor</button>
+    <div class="header-single-line">
+      <div class="ronda-top-label" id="rondaTopLabel">Ronda —: 0 edifício(s)</div>
+      <div class="header-btns">
+        <button type="button" class="btn-header-light" onclick="switchTechnician()">Trocar Auditor</button>
+        <button type="button" class="btn-header-save" onclick="exportVisitPackage()">📤 Guardar Visita</button>
       </div>
     </div>
   </header>
 
   <div class="container">
+    <!-- Bloco de Selecao: Empresa -> Edificio (com pesquisa na dropdown) -> Data -> Proxima Visita -->
     <div class="card">
       <div class="main-selector-row">
         <div>
@@ -378,6 +415,7 @@
       </div>
     </div>
 
+    <!-- PAGINA 1: OBRIGATORIEDADES LEGAIS -->
     <div id="pageLegais" class="page-view active">
       <div class="card">
         <div class="card-title">
@@ -385,31 +423,19 @@
           <span style="font-size:12px; font-weight:700;" id="needsCountLbl"></span>
         </div>
         <div id="needsContainer">
-          <div class="info-row ok">
-            <span class="info-label">Informação</span>
-            <span class="info-val">Escolhe uma empresa e um edifício acima para ver os temas e estados.</span>
+          <div class="legal-edit-row ok">
+            <span style="font-weight:700;">Informação</span>
+            <span>Escolhe uma empresa e um edifício acima para ver e editar os temas.</span>
+            <span></span>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- PAGINA 2: EVIDENCIAS -->
     <div id="pageEvidencias" class="page-view">
-      <div class="card" id="secAfetacaoSoftware">
-        <div class="card-title">
-          <span>🏢 Afetação do Edifício e Software Utilizado</span>
-        </div>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:10px;">
-          <div>
-            <label class="field-lbl" for="afetacaoInput">Afetação do Edifício</label>
-            <input type="text" id="afetacaoInput" placeholder="Ex: 1 técnico polivalente 2 dias/semana..." oninput="saveLocalState()" />
-          </div>
-          <div>
-            <label class="field-lbl" for="softwareInput">Software Utilizado</label>
-            <input type="text" id="softwareInput" placeholder="Ex: Infraspeak..." oninput="saveLocalState()" />
-          </div>
-        </div>
-      </div>
 
+      <!-- Seccao A: Estado de Conservacao dos Sistemas Tecnicos -->
       <div class="card">
         <div class="card-title">
           <span>🛠️ Estado de Conservação dos Sistemas Técnicos</span>
@@ -438,30 +464,21 @@
         </div>
       </div>
 
-      <div class="card" id="secOldWord" style="display:none;">
-        <div class="card-title">
-          <span>⏪ Problemas do Último Relatório Word (.docx)</span>
-          <button type="button" class="btn btn-outline no-print" onclick="passAllOldToAnexo()">Passar Pendentes p/ Anexo A</button>
-        </div>
-        <div id="oldReportContainer"></div>
-      </div>
-
+      <!-- Seccao B: Anexo A – Registo Fotografico da Visita -->
       <div class="card" id="secAnexoA">
         <div class="card-title">
           <span class="anexo-header">ANEXO A – Registo Fotográfico da Visita</span>
-          <div class="no-print" style="display:flex; gap:6px; flex-wrap:wrap;">
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
             <button type="button" class="btn btn-green" onclick="addAnexoRow()">+ Adicionar Linha</button>
-            <button type="button" class="btn btn-blue" onclick="copyTableForWord()">📋 Copiar p/ Word</button>
-            <button type="button" class="btn btn-outline" onclick="window.print()">🖨️ PDF / Imprimir</button>
           </div>
         </div>
 
         <table class="anexo-table" id="anexoTable">
           <thead>
             <tr>
-              <th style="width:18%;">Equipamento</th>
-              <th style="width:38%;">Descrição</th>
-              <th style="width:28%;">Foto</th>
+              <th style="width:24%;">Equipamento</th>
+              <th style="width:34%;">Descrição</th>
+              <th style="width:26%;">Foto</th>
               <th style="width:16%;">Estado</th>
             </tr>
           </thead>
@@ -469,20 +486,22 @@
         </table>
       </div>
 
+      <!-- Seccao C: Notas do Auditor -->
       <div class="card" id="secNotas">
         <div class="card-title">
           <span>📝 Notas do Auditor</span>
-          <button type="button" class="btn btn-outline no-print" style="padding:4px 9px; font-size:11px;" onclick="startVoiceNotes()">🎙️ Ditar Notas</button>
         </div>
         <textarea id="auditorNotesInput" rows="4" placeholder="Escreve aqui observações gerais, apontamentos da visita ou notas internas..." oninput="saveLocalState()"></textarea>
       </div>
     </div>
   </div>
 
-  <button type="button" class="fab-camera no-print" id="fabCameraBtn" style="display:none;" onclick="quickCameraRow()">📷 + Foto Rápida</button>
+  <!-- Botao Flutuante Camara (visivel na pagina Evidencias) -->
+  <button type="button" class="fab-camera" id="fabCameraBtn" style="display:none;" onclick="quickCameraRow()">📷 + Foto Rápida</button>
   <input type="file" id="quickCamInput" accept="image/*" capture="environment" style="display:none" onchange="handleQuickCam(event)" />
 
-  <nav class="bottom-nav no-print">
+  <!-- Navegacao Inferior: 2 Paginas -->
+  <nav class="bottom-nav">
     <button type="button" class="nav-tab active" id="tabLegais" onclick="switchPage('legais')">
       <span>📋 Obrigatoriedades Legais</span>
     </button>
@@ -492,53 +511,6 @@
   </nav>
 
   <script>
-    const GH_OWNER = 'AfonsoRobertoLMSI';
-    const GH_REPO = 'visitas-tecnicas';
-    const GH_BRANCH = 'main';
-    const GH_PASTA_VISITAS = 'visitas_pendentes';
-    // Preenche aqui o token com permissão Contents (Read & Write) para envio direto para o GitHub:
-    const GH_TOKEN = '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';
-
-    function utf8ToBase64(str) {
-      const bytes = new TextEncoder().encode(str);
-      let bin = '';
-      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-      return btoa(bin);
-    }
-
-    async function enviarVisitaParaGitHub(fileName, jsonStr) {
-      if (!GH_TOKEN) return false;
-      const path = `${GH_PASTA_VISITAS}/${fileName}`;
-      const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${encodeURIComponent(path)}`;
-      let sha = '';
-      try {
-        const getResp = await fetch(`${url}?ref=${GH_BRANCH}`, {
-          headers: { Authorization: `Bearer ${GH_TOKEN}` }
-        });
-        if (getResp.ok) {
-          const info = await getResp.json();
-          sha = info.sha || '';
-        }
-      } catch (_) {}
-
-      const body = {
-        message: `Exporta visita ${fileName}`,
-        branch: GH_BRANCH,
-        content: utf8ToBase64(jsonStr),
-        ...(sha ? { sha } : {})
-      };
-
-      const putResp = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${GH_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
-      return putResp.ok;
-    }
-
     const SISTEMAS_TECNICOS_PADRAO = [
       'AVAC',
       'AQS',
@@ -561,18 +533,15 @@
     let activePage = 'legais';
     let storesData = [];
     let filteredStoreIndices = [];
-    let oldAnexoItems = [];
     let visitsByStore = {};
+    let currentTemasEditaveis = [];
 
-    let afetacaoEdif = '';
-    let softwareEdif = '';
     let conservacaoRows = createDefaultConservacao();
-
     function createDefaultAnexoRows() {
       const base = Date.now();
       return [
-        { id: base + 1, eq: 'Certificado Energético Exposto', anomalia: '', acao: '', foto: '', estado: 'Exposto' },
-        { id: base + 2, eq: 'Certificado de Inspeção do Elevador Exposto', anomalia: '', acao: '', foto: '', estado: 'Exposto' }
+        { id: base + 1, eq: 'Certificado Energético Exposto', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' },
+        { id: base + 2, eq: 'Certificado de Inspeção do Elevador Exposto', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }
       ];
     }
 
@@ -587,10 +556,18 @@
       }));
     }
 
+    function updateTopRondaLabel(count) {
+      const el = document.getElementById('rondaTopLabel');
+      const nomeAud = currentTech || '—';
+      const n = Number.isFinite(count) ? count : storesData.length;
+      if (el) el.textContent = `Ronda ${nomeAud}: ${n} edifício(s)`;
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('visitDate').valueAsDate = new Date();
       renderConservacaoTable();
       renderAnexoRows();
+      updateTopRondaLabel(0);
       const savedTech = localStorage.getItem('lmsi_tech_name') || '';
       const pinOk = localStorage.getItem('lmsi_pin_ok') === '1';
       if (savedTech) document.getElementById('techSelect').value = savedTech;
@@ -692,10 +669,10 @@
       const slug = slugifyTech(tech);
       window.LMSI_DATA_B64 = null;
       window.LMSI_FOTOS_TEMP = null;
-      document.getElementById('techBadge').textContent = `Auditor: ${tech}`;
-      document.getElementById('syncStatus').textContent = 'A carregar ronda...';
+      updateTopRondaLabel(0);
 
       visitsByStore = {};
+      currentTemasEditaveis = [];
       conservacaoRows = createDefaultConservacao();
       anexoRows = createDefaultAnexoRows();
       auditorNotes = '';
@@ -734,26 +711,31 @@
 
     function loadEmbeddedJsData() {
       if (!window.LMSI_DATA_B64) {
-        document.getElementById('syncStatus').textContent = `Sem ronda preparada p/ ${currentTech}`;
+        updateTopRondaLabel(0);
         return;
       }
       try {
         const jsonText = decodeBase64Utf8(window.LMSI_DATA_B64);
         const parsed = JSON.parse(jsonText);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          populateStoresDropdown(parsed, `Ronda ${currentTech}`);
+          populateStoresDropdown(parsed);
         }
       } catch (err) {
         console.error('Erro ao descodificar dados:', err);
-        document.getElementById('syncStatus').textContent = 'Erro nos dados da ronda';
+        updateTopRondaLabel(0);
       }
     }
 
-    function populateStoresDropdown(list, sourceLabel) {
-      storesData = list;
+    function populateStoresDropdown(list) {
+      storesData = (Array.isArray(list) ? list : []).map(item => {
+        const empClean = String((item && item.emp) || '').trim() || 'Sem Empresa';
+        const edifClean = String((item && item.edif) || '').trim();
+        return Object.assign({}, item, { emp: empClean, edif: edifClean });
+      }).filter(item => item.edif !== '');
+
       const compSel = document.getElementById('companySelect');
       const companies = Array.from(new Set(
-        storesData.map(st => String(st.emp || 'Sem Empresa').trim()).filter(Boolean)
+        storesData.map(st => st.emp).filter(Boolean)
       )).sort((a, b) => a.localeCompare(b, 'pt'));
 
       compSel.innerHTML = '<option value="">Empresa</option>';
@@ -765,7 +747,7 @@
       });
 
       document.getElementById('buildingSearchInput').value = '';
-      document.getElementById('syncStatus').textContent = `${sourceLabel}: ${storesData.length} edifício(s)`;
+      updateTopRondaLabel(storesData.length);
       filterBuildingsList(false);
     }
 
@@ -795,10 +777,10 @@
 
       filteredStoreIndices = [];
       storesData.forEach((st, idx) => {
-        const emp = String(st.emp || 'Sem Empresa').trim();
-        const edif = String(st.edif || '').trim();
+        const emp = st.emp;
+        const edif = st.edif;
         const matchComp = !selectedCompany || emp === selectedCompany;
-        const matchSearch = !searchNorm || normalizarTexto(edif).includes(searchNorm) || normalizarTexto(emp).includes(searchNorm);
+        const matchSearch = !searchNorm || normalizarTexto(edif).includes(searchNorm);
         if (matchComp && matchSearch) {
           filteredStoreIndices.push(idx);
         }
@@ -836,17 +818,6 @@
       }
     }
 
-    function countStoreProblems(st) {
-      if (Array.isArray(st.temas)) {
-        let count = 0;
-        st.temas.forEach(t => {
-          (t.itens || []).forEach(it => { if (it.problema) count++; });
-        });
-        return count;
-      }
-      return (st.needs || []).filter(n => n.problema !== false).length;
-    }
-
     function nextVisitInstallation() {
       saveCurrentStoreDraft();
       const sel = document.getElementById('storeSelect');
@@ -861,10 +832,12 @@
         onStoreChange();
       } else {
         setCurrentStoreName('');
+        currentTemasEditaveis = [];
         conservacaoRows = createDefaultConservacao();
         anexoRows = createDefaultAnexoRows();
         auditorNotes = '';
         document.getElementById('auditorNotesInput').value = '';
+        renderLegalRequirementsByTheme(null);
         renderConservacaoTable();
         renderAnexoRows();
         saveLocalState();
@@ -876,13 +849,10 @@
     function saveCurrentStoreDraft() {
       const key = getCurrentStoreName();
       if (!key) return;
-      afetacaoEdif = document.getElementById('afetacaoInput').value || '';
-      softwareEdif = document.getElementById('softwareInput').value || '';
       auditorNotes = document.getElementById('auditorNotesInput').value || '';
       visitsByStore[key] = {
         visitDate: document.getElementById('visitDate').value,
-        afetacao: afetacaoEdif,
-        software: softwareEdif,
+        temasEditaveis: JSON.parse(JSON.stringify(currentTemasEditaveis)),
         conservacaoRows: JSON.parse(JSON.stringify(conservacaoRows)),
         anexoRows: JSON.parse(JSON.stringify(anexoRows)),
         auditorNotes: auditorNotes
@@ -892,7 +862,7 @@
 
     function updateRondaCounter() {
       const count = Object.keys(visitsByStore).length;
-      document.getElementById('rondaCounterLbl').textContent = `Instalações trabalhadas hoje (${currentTech}): ${count}`;
+      document.getElementById('rondaCounterLbl').textContent = `Instalações trabalhadas hoje (${currentTech || '—'}): ${count}`;
     }
 
     function onStoreChange() {
@@ -901,28 +871,25 @@
       const st = storesData[idx];
       setCurrentStoreName(st.edif);
 
-      renderLegalRequirementsByTheme(st);
-
       if (visitsByStore[st.edif]) {
         const saved = visitsByStore[st.edif];
         if (saved.visitDate) document.getElementById('visitDate').value = saved.visitDate;
-        afetacaoEdif = (saved.afetacao !== undefined) ? saved.afetacao : (st.afetacao || '');
-        softwareEdif = (saved.software !== undefined) ? saved.software : (st.software || '');
+        currentTemasEditaveis = Array.isArray(saved.temasEditaveis) && saved.temasEditaveis.length > 0
+          ? JSON.parse(JSON.stringify(saved.temasEditaveis))
+          : buildTemasFromStore(st);
         conservacaoRows = Array.isArray(saved.conservacaoRows) ? JSON.parse(JSON.stringify(saved.conservacaoRows)) : createDefaultConservacaoFromStore(st);
         const savedRows = Array.isArray(saved.anexoRows) ? JSON.parse(JSON.stringify(saved.anexoRows)) : createDefaultAnexoRows();
         const hasAnyContent = savedRows.some(r => (r.eq && r.eq.trim()) || (r.anomalia && r.anomalia.trim()) || (r.acao && r.acao.trim()) || r.foto);
         anexoRows = hasAnyContent ? savedRows : createDefaultAnexoRows();
         auditorNotes = saved.auditorNotes || '';
       } else {
-        afetacaoEdif = st.afetacao || '';
-        softwareEdif = st.software || '';
+        currentTemasEditaveis = buildTemasFromStore(st);
         conservacaoRows = createDefaultConservacaoFromStore(st);
         anexoRows = createDefaultAnexoRows();
         auditorNotes = '';
       }
-      document.getElementById('afetacaoInput').value = afetacaoEdif;
-      document.getElementById('softwareInput').value = softwareEdif;
 
+      renderLegalRequirementsByTheme(st);
       document.getElementById('auditorNotesInput').value = auditorNotes;
       applyTempPhotosForCurrentStore();
       renderConservacaoTable();
@@ -946,43 +913,49 @@
       return base;
     }
 
-    function renderLegalRequirementsByTheme(st) {
-      const cont = document.getElementById('needsContainer');
-      const countLbl = document.getElementById('needsCountLbl');
-
-      let temas = [];
+    function buildTemasFromStore(st) {
+      if (!st) return [];
       if (Array.isArray(st.temas) && st.temas.length > 0) {
-        temas = st.temas;
-      } else {
-        const mapTemas = {};
-        const addItem = (tema, label, valor, isProblem) => {
-          if (!mapTemas[tema]) mapTemas[tema] = [];
-          mapTemas[tema].push({ label, valor, problema: !!isProblem });
-        };
+        return st.temas.map(t => ({
+          tema: t.tema || 'Tema',
+          itens: (t.itens || []).map(it => ({
+            label: it.label || 'Campo',
+            valor: it.valor || '',
+            problema: !!it.problema
+          }))
+        }));
+      }
 
-        if (st.emp) addItem('Identificação e Equipa', 'Empresa', st.emp, false);
-        if (st.edif) addItem('Identificação e Equipa', 'Edifício / Instalação', st.edif, false);
-        if (st.tge) addItem('Identificação e Equipa', 'TGE', st.tge, false);
-        if (st.om) addItem('Identificação e Equipa', 'O&M Engineer', st.om, false);
-        if (st.ultVisita) addItem('Identificação e Equipa', 'Última Visita', st.ultVisita, false);
+      const mapTemas = {};
+      const addItem = (tema, label, valor, isProblem) => {
+        if (!mapTemas[tema]) mapTemas[tema] = [];
+        mapTemas[tema].push({ label, valor, problema: !!isProblem });
+      };
 
-        if (Array.isArray(st.needs)) {
-          st.needs.forEach(n => {
-            const tema = n.tema || mapCategoryToTheme(n.cat || 'Geral');
-            const label = n.label || n.cat || 'Requisito';
-            const valor = n.valor || n.msg || '';
-            const isProb = (n.problema !== undefined) ? !!n.problema : detectIsProblem(valor);
-            addItem(tema, label, valor, isProb);
-          });
-        }
+      if (st.emp) addItem('Identificação e Equipa', 'Empresa', st.emp, false);
+      if (st.edif) addItem('Identificação e Equipa', 'Edifício / Instalação', st.edif, false);
+      if (st.tge) addItem('Identificação e Equipa', 'TGE', st.tge, false);
+      if (st.om) addItem('Identificação e Equipa', 'O&M Engineer', st.om, false);
+      if (st.ultVisita) addItem('Identificação e Equipa', 'Última Visita', st.ultVisita, false);
 
-        Object.keys(mapTemas).forEach(k => {
-          temas.push({ tema: k, itens: mapTemas[k] });
+      if (Array.isArray(st.needs)) {
+        st.needs.forEach(n => {
+          const tema = n.tema || mapCategoryToTheme(n.cat || 'Geral');
+          const label = n.label || n.cat || 'Requisito';
+          const valor = n.valor || n.msg || '';
+          const isProb = (n.problema !== undefined) ? !!n.problema : detectIsProblem(valor);
+          addItem(tema, label, valor, isProb);
         });
       }
 
+      return Object.keys(mapTemas).map(k => ({ tema: k, itens: mapTemas[k] }));
+    }
+
+    function updateLegalBadgeSummary() {
+      const countLbl = document.getElementById('needsCountLbl');
+      if (!countLbl) return;
       let totalProblems = 0;
-      temas.forEach(t => {
+      currentTemasEditaveis.forEach(t => {
         (t.itens || []).forEach(it => { if (it.problema) totalProblems++; });
       });
 
@@ -993,17 +966,38 @@
         countLbl.style.color = '#166534';
         countLbl.textContent = '✅ Tudo conforme';
       }
+    }
 
-      if (temas.length === 0) {
+    function renderLegalRequirementsByTheme(st) {
+      const cont = document.getElementById('needsContainer');
+      if (!st) {
         cont.innerHTML = `
-          <div class="info-row ok">
-            <span class="info-label">Estado Geral</span>
-            <span class="info-val">Sem registos ou incumprimentos para esta instalação.</span>
+          <div class="legal-edit-row ok">
+            <span style="font-weight:700;">Informação</span>
+            <span>Escolhe uma empresa e um edifício acima para ver e editar os temas.</span>
+            <span></span>
+          </div>`;
+        updateLegalBadgeSummary();
+        return;
+      }
+
+      if (!Array.isArray(currentTemasEditaveis) || currentTemasEditaveis.length === 0) {
+        currentTemasEditaveis = buildTemasFromStore(st);
+      }
+
+      updateLegalBadgeSummary();
+
+      if (currentTemasEditaveis.length === 0) {
+        cont.innerHTML = `
+          <div class="legal-edit-row ok">
+            <span style="font-weight:700;">Estado Geral</span>
+            <span>Sem registos ou incumprimentos para esta instalação.</span>
+            <span></span>
           </div>`;
         return;
       }
 
-      cont.innerHTML = temas.map(t => {
+      cont.innerHTML = currentTemasEditaveis.map((t, tIdx) => {
         const itens = t.itens || [];
         const hasProb = itens.some(it => it.problema);
         const probCount = itens.filter(it => it.problema).length;
@@ -1011,21 +1005,62 @@
           <div class="theme-group ${hasProb ? 'has-problem' : ''}">
             <div class="theme-header">
               <span>${escapeHtml(t.tema)}</span>
-              <span class="theme-badge ${hasProb ? 'problem' : ''}">
-                ${hasProb ? `${probCount} com problema` : 'Conforme / Info'}
-              </span>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="theme-badge ${hasProb ? 'problem' : ''}">
+                  ${hasProb ? `${probCount} com problema` : 'Conforme / Info'}
+                </span>
+                <button type="button" class="btn btn-outline btn-xs" onclick="addLegalItem(${tIdx})">+ Item</button>
+              </div>
             </div>
             <div class="theme-items">
-              ${itens.map(it => `
-                <div class="info-row ${it.problema ? 'problem' : 'ok'}">
-                  <span class="info-label">${escapeHtml(it.label)}</span>
-                  <span class="info-val">${escapeHtml(it.valor || '—')}</span>
+              ${itens.map((it, iIdx) => `
+                <div class="legal-edit-row ${it.problema ? 'problem' : 'ok'}" id="legalRow_${tIdx}_${iIdx}">
+                  <input type="text" class="legal-edit-input" value="${escapeAttr(it.label || '')}" placeholder="Campo" oninput="updateLegalItemField(${tIdx}, ${iIdx}, 'label', this.value)" />
+                  <input type="text" class="legal-edit-input" value="${escapeAttr(it.valor || '')}" placeholder="Detalhe / estado..." oninput="updateLegalItemField(${tIdx}, ${iIdx}, 'valor', this.value)" />
+                  <div class="legal-row-actions">
+                    <button type="button" class="btn btn-xs ${it.problema ? 'btn-danger' : 'btn-green'}" onclick="toggleLegalItemProblem(${tIdx}, ${iIdx})">
+                      ${it.problema ? '⚠️ Problema' : '✅ OK'}
+                    </button>
+                    <button type="button" class="btn btn-outline btn-xs" onclick="removeLegalItem(${tIdx}, ${iIdx})" title="Remover item">✕</button>
+                  </div>
                 </div>
               `).join('')}
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    function updateLegalItemField(tIdx, iIdx, field, val) {
+      if (!currentTemasEditaveis[tIdx] || !currentTemasEditaveis[tIdx].itens[iIdx]) return;
+      currentTemasEditaveis[tIdx].itens[iIdx][field] = val;
+      saveLocalState();
+    }
+
+    function toggleLegalItemProblem(tIdx, iIdx) {
+      if (!currentTemasEditaveis[tIdx] || !currentTemasEditaveis[tIdx].itens[iIdx]) return;
+      currentTemasEditaveis[tIdx].itens[iIdx].problema = !currentTemasEditaveis[tIdx].itens[iIdx].problema;
+      renderLegalRequirementsByTheme(storesData[document.getElementById('storeSelect').value] || {});
+      saveLocalState();
+    }
+
+    function addLegalItem(tIdx) {
+      if (!currentTemasEditaveis[tIdx]) return;
+      if (!Array.isArray(currentTemasEditaveis[tIdx].itens)) currentTemasEditaveis[tIdx].itens = [];
+      currentTemasEditaveis[tIdx].itens.push({
+        label: 'Observação',
+        valor: '',
+        problema: false
+      });
+      renderLegalRequirementsByTheme(storesData[document.getElementById('storeSelect').value] || {});
+      saveLocalState();
+    }
+
+    function removeLegalItem(tIdx, iIdx) {
+      if (!currentTemasEditaveis[tIdx] || !Array.isArray(currentTemasEditaveis[tIdx].itens)) return;
+      currentTemasEditaveis[tIdx].itens.splice(iIdx, 1);
+      renderLegalRequirementsByTheme(storesData[document.getElementById('storeSelect').value] || {});
+      saveLocalState();
     }
 
     function mapCategoryToTheme(cat) {
@@ -1056,7 +1091,6 @@
           </td>
           <td>
             <div class="cons-emp-wrap">
-              <span class="no-desktop-lbl" style="display:none;">Empresa:</span>
               <input type="text" class="cons-emp-input" value="${escapeAttr(row.empresa)}" placeholder="Ex: CME / N/A..." oninput="updateConservacaoEmpresa(${idx}, this.value)" />
             </div>
           </td>
@@ -1138,33 +1172,24 @@
       }
     }
 
-    function isExpostoItem(eqName) {
-      const n = String(eqName || '').trim();
-      return n === 'Certificado Energético Exposto' || n === 'Certificado de Inspeção do Elevador Exposto';
-    }
-
     function renderAnexoRows() {
       const tbody = document.getElementById('anexoBody');
-      tbody.innerHTML = anexoRows.map((row, i) => {
-        const expItem = isExpostoItem(row.eq);
-        return `
+      tbody.innerHTML = anexoRows.map((row, i) => `
         <tr>
           <td>
             <label class="field-lbl">Equipamento</label>
-            <input type="text" value="${escapeAttr(row.eq)}" placeholder="Ex: UTA 1 / Quadro..." oninput="updateRow(${i}, 'eq', this.value)" />
-            <div class="no-print" style="margin-top:8px;">
+            <input type="text" class="eq-input-large" value="${escapeAttr(row.eq)}" placeholder="Ex: UTA 1 / Quadro..." oninput="updateRow(${i}, 'eq', this.value)" />
+            <div style="margin-top:8px;">
               <button type="button" class="btn btn-danger" style="padding:5px 9px; font-size:11px;" onclick="removeAnexoRow(${i})">🗑️ Apagar</button>
             </div>
           </td>
           <td>
             <div class="desc-label">
               <span>Anomalia:</span>
-              <button type="button" class="btn btn-outline no-print" style="padding:3px 8px; font-size:11px;" onclick="startVoice(${i}, 'anomalia')">🎙️ Ditar</button>
             </div>
             <textarea placeholder="Descreve a anomalia..." oninput="updateRow(${i}, 'anomalia', this.value)">${escapeHtml(row.anomalia)}</textarea>
             <div class="desc-label" style="margin-top:8px;">
               <span>Ação:</span>
-              <button type="button" class="btn btn-outline no-print" style="padding:3px 8px; font-size:11px;" onclick="startVoice(${i}, 'acao')">🎙️ Ditar</button>
             </div>
             <textarea placeholder="Descreve a ação recomendada..." oninput="updateRow(${i}, 'acao', this.value)">${escapeHtml(row.acao)}</textarea>
           </td>
@@ -1174,7 +1199,7 @@
                 ? `<img src="${row.foto}" class="photo-preview" />`
                 : '<div class="photo-preview" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">Sem fotografia</div>'
               }
-              <div class="no-print" style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
+              <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
                 <label class="btn btn-green" style="padding:7px 11px; font-size:12px;">
                   📷 Câmara / Foto
                   <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handleRowPhoto(event, ${i})" />
@@ -1189,33 +1214,19 @@
           <td>
             <label class="field-lbl">Estado</label>
             <select onchange="updateRow(${i}, 'estado', this.value)">
-              ${expItem ? `
-                <option value="Exposto" ${row.estado === 'Exposto' ? 'selected' : ''}>Exposto</option>
-                <option value="Não Exposto" ${row.estado === 'Não Exposto' ? 'selected' : ''}>Não Exposto</option>
-                <option value="Exposto mas Expirado" ${row.estado === 'Exposto mas Expirado' ? 'selected' : ''}>Exposto mas Expirado</option>
-                <option value="Não Resolvido" ${row.estado === 'Não Resolvido' ? 'selected' : ''}>Não Resolvido</option>
-                <option value="Resolvido" ${row.estado === 'Resolvido' ? 'selected' : ''}>Resolvido</option>
-                <option value="Em Curso" ${row.estado === 'Em Curso' ? 'selected' : ''}>Em Curso</option>
-                <option value="Informativo / OK" ${row.estado === 'Informativo / OK' ? 'selected' : ''}>Informativo / OK</option>
-              ` : `
-                <option value="Não Resolvido" ${row.estado === 'Não Resolvido' ? 'selected' : ''}>Não Resolvido</option>
-                <option value="Resolvido" ${row.estado === 'Resolvido' ? 'selected' : ''}>Resolvido</option>
-                <option value="Em Curso" ${row.estado === 'Em Curso' ? 'selected' : ''}>Em Curso</option>
-                <option value="Informativo / OK" ${row.estado === 'Informativo / OK' ? 'selected' : ''}>Informativo / OK</option>
-              `}
+              <option value="Não Resolvido" ${row.estado === 'Não Resolvido' ? 'selected' : ''}>Não Resolvido</option>
+              <option value="Resolvido" ${row.estado === 'Resolvido' ? 'selected' : ''}>Resolvido</option>
+              <option value="Em Curso" ${row.estado === 'Em Curso' ? 'selected' : ''}>Em Curso</option>
+              <option value="Informativo / OK" ${row.estado === 'Informativo / OK' ? 'selected' : ''}>Informativo / OK</option>
             </select>
           </td>
         </tr>
-      `;
-      }).join('');
+      `).join('');
     }
 
     function updateRow(idx, field, val) {
       if (!anexoRows[idx]) return;
       anexoRows[idx][field] = val;
-      if (field === 'eq') {
-        renderAnexoRows();
-      }
       saveLocalState();
     }
 
@@ -1284,36 +1295,6 @@
       reader.readAsDataURL(file);
     }
 
-    function startVoice(idx, field) {
-      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRec) return alert('O teu navegador não suporta ditado por voz direto. Usa o microfone do teclado do telemóvel.');
-      const rec = new SpeechRec();
-      rec.lang = 'pt-PT';
-      rec.interimResults = false;
-      rec.onresult = (e) => {
-        const txt = e.results[0][0].transcript;
-        anexoRows[idx][field] = (anexoRows[idx][field] ? anexoRows[idx][field] + ' ' : '') + txt;
-        renderAnexoRows();
-        saveLocalState();
-      };
-      rec.start();
-    }
-
-    function startVoiceNotes() {
-      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRec) return alert('O teu navegador não suporta ditado por voz direto. Usa o microfone do teclado do telemóvel.');
-      const rec = new SpeechRec();
-      rec.lang = 'pt-PT';
-      rec.interimResults = false;
-      rec.onresult = (e) => {
-        const txt = e.results[0][0].transcript;
-        const el = document.getElementById('auditorNotesInput');
-        el.value = (el.value ? el.value + '\n' : '') + txt;
-        saveLocalState();
-      };
-      rec.start();
-    }
-
     async function exportVisitPackage() {
       saveCurrentStoreDraft();
       const storeName = (getCurrentStoreName() || 'Visita_LMSI').replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -1324,56 +1305,38 @@
         technician: currentTech,
         storeName: getCurrentStoreName(),
         visitDate: dt,
-        afetacao: document.getElementById('afetacaoInput').value || '',
-        software: document.getElementById('softwareInput').value || '',
+        temasEditaveis: currentTemasEditaveis,
         conservacaoRows,
         anexoRows,
         auditorNotes: document.getElementById('auditorNotesInput').value || '',
         allStoresToday: visitsByStore,
         savedAt: new Date().toISOString()
       };
-      const jsonStr = JSON.stringify(payload, null, 2);
-      const blob = new Blob([jsonStr], { type: 'application/json' });
       const fileName = `Visita_${storeName}_${techSlug}_${dt}.json`;
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const file = new File([blob], fileName, { type: 'application/json' });
 
-      const enviadoGh = await enviarVisitaParaGitHub(fileName, jsonStr);
-      if (enviadoGh) {
-        alert(`Visita enviada para o GitHub (${GH_PASTA_VISITAS}/${fileName})!`);
-        return;
-      }
-
-      if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'application/json' })] })) {
+      if (typeof navigator.share === 'function') {
         try {
           await navigator.share({
             title: fileName,
             text: `Pacote de Visita Técnica LMSI (${currentTech})`,
-            files: [new File([blob], fileName, { type: 'application/json' })]
+            files: [file]
           });
           return;
-        } catch (_) {}
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+        }
       }
+
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
+      a.href = url;
       a.download = fileName;
+      document.body.appendChild(a);
       a.click();
-    }
-
-    async function copyTableForWord() {
-      let html = '<table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse; width:100%; font-family:Calibri, Arial, sans-serif; font-size:11pt;"><thead><tr style="background-color:#7F7F7F; color:#FFFFFF; font-weight:bold; text-align:center;"><th style="width:18%;">Equipamento</th><th style="width:38%;">Descrição</th><th style="width:28%;">Foto</th><th style="width:16%;">Estado</th></tr></thead><tbody>';
-      anexoRows.forEach(r => {
-        if (!r.eq && !r.anomalia && !r.acao && !r.foto) return;
-        html += `<tr><td style="vertical-align:top;">${escapeHtml(r.eq)}</td><td style="vertical-align:top;"><b>Anomalia:</b><br/>${escapeHtml(r.anomalia).replace(/\n/g, '<br/>')}<br/><br/><b>Ação:</b><br/>${escapeHtml(r.acao).replace(/\n/g, '<br/>')}</td><td style="text-align:center; vertical-align:middle;">${r.foto ? `<img src="${r.foto}" width="190" style="max-width:190px; height:auto;" />` : ''}</td><td style="text-align:center; vertical-align:middle;">${escapeHtml(r.estado)}</td></tr>`;
-      });
-      html += '</tbody></table>';
-
-      try {
-        const blobHtml = new Blob([html], { type: 'text/html' });
-        const blobText = new Blob([html.replace(/<[^>]+>/g, ' ')], { type: 'text/plain' });
-        await navigator.clipboard.write([new ClipboardItem({ 'text/html': blobHtml, 'text/plain': blobText })]);
-        alert('Tabela do Anexo A copiada! Abre o teu relatório Word e faz Ctrl + V (Colar).');
-      } catch (err) {
-        alert('Não foi possível copiar automaticamente: ' + err.message);
-      }
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
     function saveLocalState() {
@@ -1383,8 +1346,7 @@
         localStorage.setItem(getStorageKey(), JSON.stringify({
           storeName: getCurrentStoreName(),
           visitDate: document.getElementById('visitDate').value,
-          afetacao: document.getElementById('afetacaoInput').value || '',
-          software: document.getElementById('softwareInput').value || '',
+          temasEditaveis: currentTemasEditaveis,
           conservacaoRows,
           anexoRows,
           auditorNotes: document.getElementById('auditorNotesInput').value || '',
@@ -1401,15 +1363,8 @@
         const data = JSON.parse(raw);
         if (data.storeName) setCurrentStoreName(data.storeName);
         if (data.visitDate) document.getElementById('visitDate').value = data.visitDate;
-        if (typeof data.afetacao === 'string') {
-          afetacaoEdif = data.afetacao;
-          document.getElementById('afetacaoInput').value = afetacaoEdif;
-        }
-        if (typeof data.software === 'string') {
-          softwareEdif = data.software;
-          document.getElementById('softwareInput').value = softwareEdif;
-        }
         if (data.visitsByStore && typeof data.visitsByStore === 'object') visitsByStore = data.visitsByStore;
+        if (Array.isArray(data.temasEditaveis) && data.temasEditaveis.length) currentTemasEditaveis = data.temasEditaveis;
         if (Array.isArray(data.conservacaoRows) && data.conservacaoRows.length) conservacaoRows = data.conservacaoRows;
         if (Array.isArray(data.anexoRows) && data.anexoRows.length) {
           const hasContent = data.anexoRows.some(r => (r.eq && r.eq.trim()) || (r.anomalia && r.anomalia.trim()) || (r.acao && r.acao.trim()) || r.foto);
