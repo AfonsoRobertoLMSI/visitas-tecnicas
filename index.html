@@ -49,29 +49,91 @@
       background: #fff;
     }
 
-    /* Barra Superior numa linha */
+    /* Barra Superior */
     header {
-      background: var(--primary); color: #fff; padding: 10px 14px;
+      background: var(--primary); color: #fff; padding: 11px 14px;
       position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
-    .header-single-line {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      flex-wrap: nowrap; overflow-x: auto;
+    .header-top {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
     }
-    .ronda-top-label {
-      font-size: 14px; font-weight: 700; white-space: nowrap;
-      overflow: hidden; text-overflow: ellipsis;
+    .brand { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge-sync {
+      font-size: 11px; padding: 4px 9px; border-radius: 999px; background: rgba(255,255,255,0.18);
+      font-weight: 600;
     }
-    .header-btns {
-      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
-    }
-    .btn-header-light {
+    .btn-switch-auditor {
       background: #ffffff; color: var(--primary); border: none; border-radius: 8px;
-      padding: 7px 11px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
+      padding: 6px 11px; font-size: 12px; font-weight: 700; cursor: pointer;
     }
-    .btn-header-save {
-      background: #e67e22; color: #ffffff; border: none; border-radius: 8px;
-      padding: 7px 12px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
+    .toolbar-toggle {
+      background: rgba(255,255,255,0.14); color: #fff; border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 8px; padding: 5px 9px; font-size: 11px; font-weight: 600; cursor: pointer;
+    }
+    .toolbar {
+      display: none; gap: 8px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+    }
+    .toolbar.open { display: flex; }
+
+    /* Banner de aviso antecipado de memoria */
+    .mem-banner {
+      display: none;
+      margin-top: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #f59e0b;
+      font-size: 12.5px;
+      font-weight: 700;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .mem-banner.visible { display: flex; }
+    .mem-banner.critical {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #ef4444;
+    }
+
+    /* Modal Guardar Parte / Completo */
+    #saveModeModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      z-index: 9990;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    #saveModeModal.open { display: flex; }
+    .save-modal-card {
+      background: #fff;
+      border-radius: 14px;
+      max-width: 420px;
+      width: 100%;
+      padding: 20px;
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.25);
+    }
+    .save-modal-card h3 {
+      margin: 0 0 8px;
+      color: var(--primary);
+      font-size: 17px;
+    }
+    .save-modal-card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .save-modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .btn {
@@ -87,7 +149,6 @@
     .btn-teal { background: #2a7b88; color: #fff; }
     .btn-outline { background: #fff; color: var(--primary); border: 1px solid var(--border); }
     .btn-danger { background: #c82333; color: #fff; }
-    .btn-xs { padding: 4px 8px; font-size: 11px; border-radius: 6px; }
 
     .container { max-width: 1180px; margin: 12px auto; padding: 0 12px; }
     .card {
@@ -99,56 +160,16 @@
       display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
     }
 
-    /* Selecao Empresa -> Edificio (com pesquisa na dropdown) -> Data -> Proxima Visita */
-    .main-selector-row {
-      display: grid; grid-template-columns: 1fr 1.35fr 155px auto; gap: 10px; align-items: end;
+    /* Selecao Empresa -> Pesquisa Edificio -> Edificio -> Data -> Proxima Visita */
+    .selector-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     }
-    @media (max-width: 900px) {
-      .main-selector-row { grid-template-columns: 1fr 1fr; }
+    .selector-bottom {
+      display: grid; grid-template-columns: 1fr 155px auto; gap: 10px; align-items: end; margin-top: 10px;
     }
-    @media (max-width: 640px) {
-      .main-selector-row { grid-template-columns: 1fr; }
-    }
-    .edificio-dropdown-wrap { position: relative; }
-    .edificio-trigger {
-      width: 100%; padding: 10px 11px; border: 1px solid var(--border); border-radius: 8px;
-      font-size: 14px; font-family: inherit; background: #fff; color: var(--text);
-      display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      cursor: pointer; text-align: left;
-    }
-    .edificio-trigger-text {
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .edificio-caret { color: var(--muted); font-size: 12px; flex-shrink: 0; }
-    .edificio-menu {
-      display: none; position: absolute; left: 0; right: 0; top: calc(100% + 4px);
-      background: #fff; border: 1px solid var(--border); border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.16); z-index: 150; overflow: hidden;
-    }
-    .edificio-menu.open { display: block; }
-    .edificio-search-box {
-      padding: 8px; border-bottom: 1px solid var(--border); background: #f8fafc;
-    }
-    .edificio-search-box input {
-      padding: 8px 10px; font-size: 13.5px;
-    }
-    .edificio-options-list {
-      max-height: 240px; overflow-y: auto;
-    }
-    .edificio-option-item {
-      padding: 10px 12px; font-size: 13.5px; cursor: pointer; border-bottom: 1px solid #f1f5f9;
-      display: flex; justify-content: space-between; align-items: center; gap: 8px;
-    }
-    .edificio-option-item:last-child { border-bottom: none; }
-    .edificio-option-item:hover, .edificio-option-item.active {
-      background: #eff6ff; color: var(--primary); font-weight: 600;
-    }
-    .ronda-meta-row {
-      margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between;
-    }
-    .badge-inline {
-      font-size: 12px; font-weight: 600; color: var(--primary); background: #eff6ff;
-      padding: 4px 10px; border-radius: 999px;
+    @media (max-width: 720px) {
+      .selector-grid { grid-template-columns: 1fr; }
+      .selector-bottom { grid-template-columns: 1fr; }
     }
     label.field-lbl { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
     select, input[type="text"], input[type="date"], textarea {
@@ -171,7 +192,7 @@
     }
     .theme-header {
       background: #f8fafc; padding: 10px 12px; font-weight: 700; font-size: 13.5px;
-      color: var(--primary); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
+      color: var(--primary); display: flex; justify-content: space-between; align-items: center;
       border-bottom: 1px solid var(--border);
     }
     .theme-group.has-problem .theme-header {
@@ -187,29 +208,23 @@
     .theme-items {
       padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;
     }
-    .legal-edit-row {
-      display: grid; grid-template-columns: 190px 1fr auto; gap: 8px; align-items: center;
+    .info-row {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
       padding: 8px 10px; border-radius: 8px; background: #f8fafc; border-left: 4px solid #94a3b8;
       font-size: 13px;
     }
-    .legal-edit-row.ok {
+    .info-row.ok {
       background: #f0fdf4; border-left-color: var(--success);
     }
-    .legal-edit-row.problem {
-      background: #fef2f2; border-left-color: #dc2626;
+    .info-row.problem {
+      background: #fef2f2; border-left-color: #dc2626; color: #991b1b;
     }
-    .legal-edit-input {
-      padding: 7px 9px !important; font-size: 13px !important; background: rgba(255,255,255,0.92) !important;
-    }
-    .legal-edit-row.problem .legal-edit-input {
+    .info-row.problem .info-label,
+    .info-row.problem .info-val {
       color: #b91c1c; font-weight: 700;
     }
-    .legal-row-actions {
-      display: flex; gap: 5px; align-items: center; flex-wrap: wrap;
-    }
-    @media (max-width: 720px) {
-      .legal-edit-row { grid-template-columns: 1fr; }
-    }
+    .info-label { font-weight: 600; color: var(--muted); min-width: 120px; }
+    .info-val { text-align: right; color: var(--text); word-break: break-word; }
 
     /* Tabela Estado de Conservacao (Evidencias) */
     .cons-intro { font-size: 13px; color: var(--text); margin: 0 0 10px; }
@@ -270,12 +285,21 @@
       }
       .cons-sys-name { font-weight: 700; font-size: 14px; color: var(--primary); margin-bottom: 4px; }
       .cons-emp-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+      .cons-emp-wrap span { font-size: 12px; color: var(--muted); white-space: nowrap; }
       .cons-emp-input { text-align: left; }
       .dots-picker { justify-content: space-between; padding-top: 4px; }
       .dot-btn { width: 42px; height: 42px; }
     }
 
-    /* Anexo A */
+    /* Itens do Relatorio Antigo & Anexo A */
+    .old-item {
+      border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px;
+      display: grid; grid-template-columns: 100px 1fr; gap: 12px; align-items: start; background: #fafbfc;
+    }
+    .old-item img {
+      width: 100px; height: 85px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border);
+      background: #eee;
+    }
     .anexo-header {
       color: var(--teal); font-size: 17px; font-weight: 800; margin: 2px 0;
     }
@@ -288,13 +312,6 @@
     }
     table.anexo-table td {
       border: 1px solid #d0d0d0; padding: 10px; vertical-align: top;
-    }
-    .eq-input-large {
-      min-height: 48px !important;
-      padding: 11px 12px !important;
-      font-size: 14.5px !important;
-      line-height: 1.35 !important;
-      font-weight: 600;
     }
     .desc-label { font-weight: 700; font-size: 12px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
     .photo-box {
@@ -339,9 +356,37 @@
       padding: 13px 17px; font-size: 13.5px; font-weight: 700;
       box-shadow: 0 6px 16px rgba(0,0,0,0.25); cursor: pointer;
     }
+
+    @media print {
+      header, .bottom-nav, .fab-camera, .no-print, #saveModeModal { display: none !important; }
+      body { background: #fff; padding: 0; }
+      .card { border: none; box-shadow: none; padding: 0; }
+      .page-view { display: block !important; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- Modal Guardar Parte / Completo -->
+  <div id="saveModeModal">
+    <div class="save-modal-card">
+      <h3>💾 Como queres guardar esta visita?</h3>
+      <p id="saveModeDesc">
+        Ao guardar, os itens atuais do Anexo A são incluídos no ficheiro JSON e limpos da sessão para libertar memória.
+      </p>
+      <div class="save-modal-actions">
+        <button type="button" class="btn btn-amber" id="btnSavePart" onclick="confirmSaveVisit('part')">
+          🧩 Guardar como Parte (Continuação)
+        </button>
+        <button type="button" class="btn btn-green" id="btnSaveComplete" onclick="confirmSaveVisit('complete')">
+          ✅ Guardar como Completo (Última Parte / Final)
+        </button>
+        <button type="button" class="btn btn-outline" onclick="closeSaveModeModal()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Ecra de Selecao de Auditor -->
   <div id="pinOverlay" style="display:flex;">
@@ -362,56 +407,75 @@
     </div>
   </div>
 
-  <!-- Barra Superior numa linha -->
+  <!-- Barra Superior -->
   <header>
-    <div class="header-single-line">
-      <div class="ronda-top-label" id="rondaTopLabel">Ronda —: 0 edifício(s)</div>
-      <div class="header-btns">
-        <button type="button" class="btn-header-light" onclick="switchTechnician()">Trocar Auditor</button>
-        <button type="button" class="btn-header-save" onclick="exportVisitPackage()">📤 Guardar Visita</button>
+    <div class="header-top">
+      <div class="brand">
+        <span>🏢 Visitas LMSI</span>
+        <span class="badge-sync" id="techBadge">Auditor: —</span>
       </div>
+      <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+        <span class="badge-sync" id="syncStatus">A aguardar auditor...</span>
+        <button type="button" class="btn btn-amber" style="padding:6px 10px; font-size:12px;" onclick="openSaveModeModal()">📤 Guardar Visita</button>
+        <button type="button" class="btn-switch-auditor" onclick="switchTechnician()">Trocar Auditor</button>
+        <button type="button" class="toolbar-toggle" onclick="toggleToolbar()" title="Ferramentas e Exportação">⚙️ Opções</button>
+      </div>
+    </div>
+    <div id="memoryWarningBanner" class="mem-banner">
+      <span id="memoryWarningText">⚠️ A memória do navegador está a ficar cheia.</span>
+      <button type="button" class="btn btn-amber" style="padding:5px 10px; font-size:12px;" onclick="openSaveModeModal()">Guardar Parte Agora</button>
+    </div>
+    <div class="toolbar" id="topToolbar">
+      <button type="button" class="btn btn-green" onclick="document.getElementById('excelInput').click()">📊 Excel / Dados Local</button>
+      <input type="file" id="excelInput" accept=".xlsx,.xlsm,.xls,.json" style="display:none" onchange="handleExcelOrJsonUpload(event)" />
+
+      <button type="button" class="btn btn-blue" onclick="document.getElementById('wordInput').click()">📄 Último Relatório (.docx)</button>
+      <input type="file" id="wordInput" accept=".docx,.docm" style="display:none" onchange="handleWordUpload(event)" />
+
+      <button type="button" class="btn btn-amber" onclick="openSaveModeModal()">📤 Guardar JSON Visita</button>
+      <button type="button" class="btn btn-purple" onclick="document.getElementById('pkgInput').click()">📥 Abrir JSON Visita</button>
+      <input type="file" id="pkgInput" accept=".json" style="display:none" onchange="importVisitPackage(event)" />
+
+      <button type="button" class="btn btn-outline" onclick="copyTableForWord()">📋 Copiar Anexo A p/ Word</button>
     </div>
   </header>
 
   <div class="container">
-    <!-- Bloco de Selecao: Empresa -> Edificio (com pesquisa na dropdown) -> Data -> Proxima Visita -->
+    <!-- Bloco de Selecao: Empresa -> Pesquisa + Edificio -> Data -> Proxima Visita -->
     <div class="card">
-      <div class="main-selector-row">
+      <div class="selector-grid">
         <div>
-          <label class="field-lbl" for="companySelect">Empresa</label>
+          <label class="field-lbl">1. Escolher Empresa</label>
           <select id="companySelect" onchange="onCompanyChange()">
-            <option value="">Empresa</option>
+            <option value="">-- Todas as Empresas --</option>
           </select>
         </div>
-
-        <div class="edificio-dropdown-wrap" id="edificioDropdownWrap">
-          <label class="field-lbl" for="edificioTriggerBtn">Edifício</label>
-          <button type="button" class="edificio-trigger" id="edificioTriggerBtn" onclick="toggleEdificioDropdown(event)">
-            <span class="edificio-trigger-text" id="edificioTriggerText">Edifício</span>
-            <span class="edificio-caret">▾</span>
-          </button>
-          <select id="storeSelect" style="display:none;" onchange="onStoreChange()"></select>
-          <div class="edificio-menu" id="edificioMenu">
-            <div class="edificio-search-box">
-              <input type="text" id="buildingSearchInput" placeholder="Escreve para procurar edifício..." oninput="onBuildingSearch()" onclick="event.stopPropagation()" />
-            </div>
-            <div class="edificio-options-list" id="edificioOptionsList"></div>
-          </div>
-        </div>
-
         <div>
-          <label class="field-lbl" for="visitDate">Data da Visita</label>
+          <label class="field-lbl">2. Procurar Edifício (Texto)</label>
+          <input type="text" id="buildingSearchInput" placeholder="Escreve para filtrar edifício..." oninput="onBuildingSearch()" />
+        </div>
+      </div>
+
+      <div class="selector-bottom">
+        <div>
+          <label class="field-lbl">3. Escolher Edifício</label>
+          <select id="storeSelect" onchange="onStoreChange()">
+            <option value="">-- Seleciona o Edifício --</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-lbl">Data da Visita</label>
           <input type="date" id="visitDate" onchange="saveLocalState()" />
         </div>
-
         <div>
           <button type="button" class="btn btn-teal" style="width:100%; padding:10px 14px;" onclick="nextVisitInstallation()">⏭️ Próxima Visita</button>
         </div>
       </div>
 
-      <div class="ronda-meta-row">
-        <span class="badge-inline" id="currentEdifSummary">Edifício: —</span>
+      <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <input type="text" id="manualStoreName" placeholder="Nome do Edifício selecionado" oninput="saveLocalState()" style="flex:1;" />
         <span style="font-size:12px; color:var(--muted);" id="rondaCounterLbl">Instalações trabalhadas hoje: 0</span>
+        <span style="font-size:12px; font-weight:700; color:var(--primary);" id="partCounterLbl">Próxima parte: 1</span>
       </div>
     </div>
 
@@ -423,10 +487,9 @@
           <span style="font-size:12px; font-weight:700;" id="needsCountLbl"></span>
         </div>
         <div id="needsContainer">
-          <div class="legal-edit-row ok">
-            <span style="font-weight:700;">Informação</span>
-            <span>Escolhe uma empresa e um edifício acima para ver e editar os temas.</span>
-            <span></span>
+          <div class="info-row ok">
+            <span class="info-label">Informação</span>
+            <span class="info-val">Escolhe uma empresa e um edifício acima para ver os temas e estados.</span>
           </div>
         </div>
       </div>
@@ -464,21 +527,32 @@
         </div>
       </div>
 
-      <!-- Seccao B: Anexo A – Registo Fotografico da Visita -->
+      <!-- Seccao B: Problemas do Ultimo Relatorio (se carregado .docx) -->
+      <div class="card" id="secOldWord" style="display:none;">
+        <div class="card-title">
+          <span>⏪ Problemas do Último Relatório Word (.docx)</span>
+          <button type="button" class="btn btn-outline no-print" onclick="passAllOldToAnexo()">Passar Pendentes p/ Anexo A</button>
+        </div>
+        <div id="oldReportContainer"></div>
+      </div>
+
+      <!-- Seccao C: Anexo A – Registo Fotografico da Visita -->
       <div class="card" id="secAnexoA">
         <div class="card-title">
           <span class="anexo-header">ANEXO A – Registo Fotográfico da Visita</span>
-          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <div class="no-print" style="display:flex; gap:6px; flex-wrap:wrap;">
             <button type="button" class="btn btn-green" onclick="addAnexoRow()">+ Adicionar Linha</button>
+            <button type="button" class="btn btn-blue" onclick="copyTableForWord()">📋 Copiar p/ Word</button>
+            <button type="button" class="btn btn-outline" onclick="window.print()">🖨️ PDF / Imprimir</button>
           </div>
         </div>
 
         <table class="anexo-table" id="anexoTable">
           <thead>
             <tr>
-              <th style="width:24%;">Equipamento</th>
-              <th style="width:34%;">Descrição</th>
-              <th style="width:26%;">Foto</th>
+              <th style="width:18%;">Equipamento</th>
+              <th style="width:38%;">Descrição</th>
+              <th style="width:28%;">Foto</th>
               <th style="width:16%;">Estado</th>
             </tr>
           </thead>
@@ -486,10 +560,11 @@
         </table>
       </div>
 
-      <!-- Seccao C: Notas do Auditor -->
+      <!-- Seccao D: Notas do Auditor -->
       <div class="card" id="secNotas">
         <div class="card-title">
           <span>📝 Notas do Auditor</span>
+          <button type="button" class="btn btn-outline no-print" style="padding:4px 9px; font-size:11px;" onclick="startVoiceNotes()">🎙️ Ditar Notas</button>
         </div>
         <textarea id="auditorNotesInput" rows="4" placeholder="Escreve aqui observações gerais, apontamentos da visita ou notas internas..." oninput="saveLocalState()"></textarea>
       </div>
@@ -497,11 +572,11 @@
   </div>
 
   <!-- Botao Flutuante Camara (visivel na pagina Evidencias) -->
-  <button type="button" class="fab-camera" id="fabCameraBtn" style="display:none;" onclick="quickCameraRow()">📷 + Foto Rápida</button>
+  <button type="button" class="fab-camera no-print" id="fabCameraBtn" style="display:none;" onclick="quickCameraRow()">📷 + Foto Rápida</button>
   <input type="file" id="quickCamInput" accept="image/*" capture="environment" style="display:none" onchange="handleQuickCam(event)" />
 
   <!-- Navegacao Inferior: 2 Paginas -->
-  <nav class="bottom-nav">
+  <nav class="bottom-nav no-print">
     <button type="button" class="nav-tab active" id="tabLegais" onclick="switchPage('legais')">
       <span>📋 Obrigatoriedades Legais</span>
     </button>
@@ -529,24 +604,22 @@
       { id: 'nao_aplicavel', label: 'Não Aplicável', color: '#808080', type: 'star' }
     ];
 
+    // Aviso antecipado quando os dados em memória atingem ~3.5 MB ou ~4.5 MB
+    const MEMORY_WARN_BYTES = 3.5 * 1024 * 1024;
+    const MEMORY_CRIT_BYTES = 4.5 * 1024 * 1024;
+
     let currentTech = '';
     let activePage = 'legais';
     let storesData = [];
     let filteredStoreIndices = [];
+    let oldAnexoItems = [];
     let visitsByStore = {};
-    let currentTemasEditaveis = [];
-    let storageQuotaWarningShown = false;
+    let currentPartNumber = 1;
 
     let conservacaoRows = createDefaultConservacao();
-    function createDefaultAnexoRows() {
-      const base = Date.now();
-      return [
-        { id: base + 1, eq: 'Certificado Energético Exposto', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' },
-        { id: base + 2, eq: 'Certificado de Inspeção do Elevador Exposto', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }
-      ];
-    }
-
-    let anexoRows = createDefaultAnexoRows();
+    let anexoRows = [
+      { id: Date.now() + 1, eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' }
+    ];
     let auditorNotes = '';
 
     function createDefaultConservacao() {
@@ -557,18 +630,14 @@
       }));
     }
 
-    function updateTopRondaLabel(count) {
-      const el = document.getElementById('rondaTopLabel');
-      const nomeAud = currentTech || '—';
-      const n = Number.isFinite(count) ? count : storesData.length;
-      if (el) el.textContent = `Ronda ${nomeAud}: ${n} edifício(s)`;
+    function createEmptyAnexoRow() {
+      return { id: Date.now() + Math.random(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' };
     }
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('visitDate').valueAsDate = new Date();
       renderConservacaoTable();
-      renderAnexoRows();
-      updateTopRondaLabel(0);
+      updatePartCounterLabel();
       const savedTech = localStorage.getItem('lmsi_tech_name') || '';
       const pinOk = localStorage.getItem('lmsi_pin_ok') === '1';
       if (savedTech) document.getElementById('techSelect').value = savedTech;
@@ -578,6 +647,38 @@
         initTechnicianSession(savedTech);
       }
     });
+
+    function updatePartCounterLabel() {
+      const el = document.getElementById('partCounterLbl');
+      if (el) el.textContent = `Parte atual: ${currentPartNumber}`;
+    }
+
+    function openSaveModeModal() {
+      saveCurrentStoreDraft();
+      const photoCount = anexoRows.filter(r => !!r.foto).length;
+      const itemCount = anexoRows.filter(r => r.eq || r.anomalia || r.acao || r.foto).length;
+      const desc = document.getElementById('saveModeDesc');
+      if (desc) {
+        desc.textContent =
+          `Anexo atual: ${itemCount} linha(s) (${photoCount} foto(s)). ` +
+          `Próximo ficheiro como Parte: "..._parte_${currentPartNumber}.json". ` +
+          `Ao guardar, o Anexo A atual é limpo para libertar memória.`;
+      }
+      document.getElementById('saveModeModal').classList.add('open');
+    }
+
+    function closeSaveModeModal() {
+      document.getElementById('saveModeModal').classList.remove('open');
+    }
+
+    async function confirmSaveVisit(mode) {
+      closeSaveModeModal();
+      await exportVisitPackage(mode);
+    }
+
+    function toggleToolbar() {
+      document.getElementById('topToolbar').classList.toggle('open');
+    }
 
     function switchPage(page) {
       activePage = page;
@@ -634,57 +735,27 @@
       return 'lmsi_visita_state_v3_' + slugifyTech(currentTech);
     }
 
-    let currentStoreName = '';
-
-    function getCurrentStoreName() {
-      return currentStoreName;
-    }
-
-    function setCurrentStoreName(name) {
-      currentStoreName = String(name || '').trim();
-      document.getElementById('edificioTriggerText').textContent = currentStoreName || 'Edifício';
-      document.getElementById('currentEdifSummary').textContent = 'Edifício: ' + (currentStoreName || '—');
-    }
-
-    function toggleEdificioDropdown(ev) {
-      if (ev) ev.stopPropagation();
-      const menu = document.getElementById('edificioMenu');
-      const isOpen = menu.classList.contains('open');
-      menu.classList.toggle('open', !isOpen);
-      if (!isOpen) {
-        const inp = document.getElementById('buildingSearchInput');
-        setTimeout(() => inp.focus(), 20);
-      }
-    }
-
-    document.addEventListener('click', (e) => {
-      const wrap = document.getElementById('edificioDropdownWrap');
-      const menu = document.getElementById('edificioMenu');
-      if (wrap && menu && !wrap.contains(e.target)) {
-        menu.classList.remove('open');
-      }
-    });
-
     function initTechnicianSession(tech) {
       currentTech = tech;
-      storageQuotaWarningShown = false;
       const slug = slugifyTech(tech);
       window.LMSI_DATA_B64 = null;
       window.LMSI_FOTOS_TEMP = null;
-      updateTopRondaLabel(0);
+      document.getElementById('techBadge').textContent = `Auditor: ${tech}`;
+      document.getElementById('syncStatus').textContent = 'A carregar ronda...';
 
       visitsByStore = {};
-      currentTemasEditaveis = [];
+      currentPartNumber = 1;
       conservacaoRows = createDefaultConservacao();
-      anexoRows = createDefaultAnexoRows();
+      anexoRows = [createEmptyAnexoRow()];
       auditorNotes = '';
       document.getElementById('auditorNotesInput').value = '';
-      setCurrentStoreName('');
 
       loadLocalState();
+      updatePartCounterLabel();
       renderConservacaoTable();
       renderAnexoRows();
       updateRondaCounter();
+      checkMemoryWarning();
 
       loadScriptAsync(`dados_lmsi_${slug}.js?t=${Date.now()}`, () => {
         loadScriptAsync(`fotos_ronda_${slug}.js?t=${Date.now()}`, () => {
@@ -713,34 +784,29 @@
 
     function loadEmbeddedJsData() {
       if (!window.LMSI_DATA_B64) {
-        updateTopRondaLabel(0);
+        document.getElementById('syncStatus').textContent = `Sem ronda preparada p/ ${currentTech}`;
         return;
       }
       try {
         const jsonText = decodeBase64Utf8(window.LMSI_DATA_B64);
         const parsed = JSON.parse(jsonText);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          populateStoresDropdown(parsed);
+          populateStoresDropdown(parsed, `Ronda ${currentTech}`);
         }
       } catch (err) {
         console.error('Erro ao descodificar dados:', err);
-        updateTopRondaLabel(0);
+        document.getElementById('syncStatus').textContent = 'Erro nos dados da ronda';
       }
     }
 
-    function populateStoresDropdown(list) {
-      storesData = (Array.isArray(list) ? list : []).map(item => {
-        const empClean = String((item && item.emp) || '').trim() || 'Sem Empresa';
-        const edifClean = String((item && item.edif) || '').trim();
-        return Object.assign({}, item, { emp: empClean, edif: edifClean });
-      }).filter(item => item.edif !== '');
-
+    function populateStoresDropdown(list, sourceLabel) {
+      storesData = list;
       const compSel = document.getElementById('companySelect');
       const companies = Array.from(new Set(
-        storesData.map(st => st.emp).filter(Boolean)
+        storesData.map(st => String(st.emp || 'Sem Empresa').trim()).filter(Boolean)
       )).sort((a, b) => a.localeCompare(b, 'pt'));
 
-      compSel.innerHTML = '<option value="">Empresa</option>';
+      compSel.innerHTML = '<option value="">-- Todas as Empresas (' + companies.length + ') --</option>';
       companies.forEach(c => {
         const opt = document.createElement('option');
         opt.value = c;
@@ -749,75 +815,66 @@
       });
 
       document.getElementById('buildingSearchInput').value = '';
-      updateTopRondaLabel(storesData.length);
-      filterBuildingsList(false);
+      document.getElementById('syncStatus').textContent = `${sourceLabel}: ${storesData.length} edifício(s)`;
+      filterBuildingsList(true);
     }
 
     function onCompanyChange() {
-      setCurrentStoreName('');
-      document.getElementById('storeSelect').value = '';
-      filterBuildingsList(false);
+      filterBuildingsList(true);
     }
 
     function onBuildingSearch() {
       filterBuildingsList(false);
     }
 
-    function selectEdificioFromMenu(idx) {
-      const sel = document.getElementById('storeSelect');
-      sel.value = String(idx);
-      document.getElementById('edificioMenu').classList.remove('open');
-      onStoreChange();
-    }
-
     function filterBuildingsList(autoSelectFirst) {
       const selectedCompany = document.getElementById('companySelect').value;
       const searchNorm = normalizarTexto(document.getElementById('buildingSearchInput').value);
       const sel = document.getElementById('storeSelect');
-      const listEl = document.getElementById('edificioOptionsList');
       const prevVal = sel.value;
 
       filteredStoreIndices = [];
       storesData.forEach((st, idx) => {
-        const emp = st.emp;
-        const edif = st.edif;
+        const emp = String(st.emp || 'Sem Empresa').trim();
+        const edif = String(st.edif || '').trim();
         const matchComp = !selectedCompany || emp === selectedCompany;
-        const matchSearch = !searchNorm || normalizarTexto(edif).includes(searchNorm);
+        const matchSearch = !searchNorm || normalizarTexto(edif).includes(searchNorm) || normalizarTexto(emp).includes(searchNorm);
         if (matchComp && matchSearch) {
           filteredStoreIndices.push(idx);
         }
       });
 
-      sel.innerHTML = '<option value="">Edifício</option>';
+      sel.innerHTML = '<option value="">-- Seleciona o Edifício (' + filteredStoreIndices.length + ') --</option>';
       filteredStoreIndices.forEach(idx => {
         const st = storesData[idx];
+        const problemsCount = countStoreProblems(st);
         const opt = document.createElement('option');
         opt.value = idx;
-        opt.textContent = st.edif;
+        opt.textContent = `${st.edif} (${st.emp || 'LMSI'})${problemsCount > 0 ? ' — ' + problemsCount + ' alerta(s)' : ''}`;
         sel.appendChild(opt);
       });
 
       if (filteredStoreIndices.length === 0) {
-        listEl.innerHTML = '<div style="padding:10px 12px; font-size:13px; color:var(--muted);">Nenhum edifício encontrado.</div>';
         return;
       }
 
-      listEl.innerHTML = filteredStoreIndices.map(idx => {
-        const st = storesData[idx];
-        const isSel = String(idx) === String(sel.value);
-        return `
-          <div class="edificio-option-item ${isSel ? 'active' : ''}" onclick="selectEdificioFromMenu(${idx})">
-            <span>${escapeHtml(st.edif)}</span>
-          </div>
-        `;
-      }).join('');
-
       if (!autoSelectFirst && prevVal !== '' && filteredStoreIndices.includes(Number(prevVal))) {
         sel.value = prevVal;
-      } else if (autoSelectFirst) {
+      } else if (autoSelectFirst || filteredStoreIndices.length === 1) {
         sel.value = filteredStoreIndices[0];
         onStoreChange();
       }
+    }
+
+    function countStoreProblems(st) {
+      if (Array.isArray(st.temas)) {
+        let count = 0;
+        st.temas.forEach(t => {
+          (t.itens || []).forEach(it => { if (it.problema) count++; });
+        });
+        return count;
+      }
+      return (st.needs || []).filter(n => n.problema !== false).length;
     }
 
     function nextVisitInstallation() {
@@ -833,13 +890,11 @@
         sel.value = nextIdx;
         onStoreChange();
       } else {
-        setCurrentStoreName('');
-        currentTemasEditaveis = [];
+        document.getElementById('manualStoreName').value = '';
         conservacaoRows = createDefaultConservacao();
-        anexoRows = createDefaultAnexoRows();
+        anexoRows = [createEmptyAnexoRow()];
         auditorNotes = '';
         document.getElementById('auditorNotesInput').value = '';
-        renderLegalRequirementsByTheme(null);
         renderConservacaoTable();
         renderAnexoRows();
         saveLocalState();
@@ -849,12 +904,11 @@
     }
 
     function saveCurrentStoreDraft() {
-      const key = getCurrentStoreName();
+      const key = (document.getElementById('manualStoreName').value || '').trim();
       if (!key) return;
       auditorNotes = document.getElementById('auditorNotesInput').value || '';
       visitsByStore[key] = {
         visitDate: document.getElementById('visitDate').value,
-        temasEditaveis: JSON.parse(JSON.stringify(currentTemasEditaveis)),
         conservacaoRows: JSON.parse(JSON.stringify(conservacaoRows)),
         anexoRows: JSON.parse(JSON.stringify(anexoRows)),
         auditorNotes: auditorNotes
@@ -864,34 +918,29 @@
 
     function updateRondaCounter() {
       const count = Object.keys(visitsByStore).length;
-      document.getElementById('rondaCounterLbl').textContent = `Instalações trabalhadas hoje (${currentTech || '—'}): ${count}`;
+      document.getElementById('rondaCounterLbl').textContent = `Instalações trabalhadas hoje (${currentTech}): ${count}`;
     }
 
     function onStoreChange() {
       const idx = document.getElementById('storeSelect').value;
       if (idx === '' || !storesData[idx]) return;
       const st = storesData[idx];
-      setCurrentStoreName(st.edif);
+      document.getElementById('manualStoreName').value = st.edif;
+
+      renderLegalRequirementsByTheme(st);
 
       if (visitsByStore[st.edif]) {
         const saved = visitsByStore[st.edif];
         if (saved.visitDate) document.getElementById('visitDate').value = saved.visitDate;
-        currentTemasEditaveis = Array.isArray(saved.temasEditaveis) && saved.temasEditaveis.length > 0
-          ? JSON.parse(JSON.stringify(saved.temasEditaveis))
-          : buildTemasFromStore(st);
         conservacaoRows = Array.isArray(saved.conservacaoRows) ? JSON.parse(JSON.stringify(saved.conservacaoRows)) : createDefaultConservacaoFromStore(st);
-        const savedRows = Array.isArray(saved.anexoRows) ? JSON.parse(JSON.stringify(saved.anexoRows)) : createDefaultAnexoRows();
-        const hasAnyContent = savedRows.some(r => (r.eq && r.eq.trim()) || (r.anomalia && r.anomalia.trim()) || (r.acao && r.acao.trim()) || r.foto);
-        anexoRows = hasAnyContent ? savedRows : createDefaultAnexoRows();
+        anexoRows = Array.isArray(saved.anexoRows) && saved.anexoRows.length ? JSON.parse(JSON.stringify(saved.anexoRows)) : [createEmptyAnexoRow()];
         auditorNotes = saved.auditorNotes || '';
       } else {
-        currentTemasEditaveis = buildTemasFromStore(st);
         conservacaoRows = createDefaultConservacaoFromStore(st);
-        anexoRows = createDefaultAnexoRows();
+        anexoRows = [createEmptyAnexoRow()];
         auditorNotes = '';
       }
 
-      renderLegalRequirementsByTheme(st);
       document.getElementById('auditorNotesInput').value = auditorNotes;
       applyTempPhotosForCurrentStore();
       renderConservacaoTable();
@@ -915,49 +964,43 @@
       return base;
     }
 
-    function buildTemasFromStore(st) {
-      if (!st) return [];
+    function renderLegalRequirementsByTheme(st) {
+      const cont = document.getElementById('needsContainer');
+      const countLbl = document.getElementById('needsCountLbl');
+
+      let temas = [];
       if (Array.isArray(st.temas) && st.temas.length > 0) {
-        return st.temas.map(t => ({
-          tema: t.tema || 'Tema',
-          itens: (t.itens || []).map(it => ({
-            label: it.label || 'Campo',
-            valor: it.valor || '',
-            problema: !!it.problema
-          }))
-        }));
-      }
+        temas = st.temas;
+      } else {
+        const mapTemas = {};
+        const addItem = (tema, label, valor, isProblem) => {
+          if (!mapTemas[tema]) mapTemas[tema] = [];
+          mapTemas[tema].push({ label, valor, problema: !!isProblem });
+        };
 
-      const mapTemas = {};
-      const addItem = (tema, label, valor, isProblem) => {
-        if (!mapTemas[tema]) mapTemas[tema] = [];
-        mapTemas[tema].push({ label, valor, problema: !!isProblem });
-      };
+        if (st.emp) addItem('Identificação e Equipa', 'Empresa', st.emp, false);
+        if (st.edif) addItem('Identificação e Equipa', 'Edifício / Instalação', st.edif, false);
+        if (st.tge) addItem('Identificação e Equipa', 'TGE', st.tge, false);
+        if (st.om) addItem('Identificação e Equipa', 'O&M Engineer', st.om, false);
+        if (st.ultVisita) addItem('Identificação e Equipa', 'Última Visita', st.ultVisita, false);
 
-      if (st.emp) addItem('Identificação e Equipa', 'Empresa', st.emp, false);
-      if (st.edif) addItem('Identificação e Equipa', 'Edifício / Instalação', st.edif, false);
-      if (st.tge) addItem('Identificação e Equipa', 'TGE', st.tge, false);
-      if (st.om) addItem('Identificação e Equipa', 'O&M Engineer', st.om, false);
-      if (st.ultVisita) addItem('Identificação e Equipa', 'Última Visita', st.ultVisita, false);
+        if (Array.isArray(st.needs)) {
+          st.needs.forEach(n => {
+            const tema = n.tema || mapCategoryToTheme(n.cat || 'Geral');
+            const label = n.label || n.cat || 'Requisito';
+            const valor = n.valor || n.msg || '';
+            const isProb = (n.problema !== undefined) ? !!n.problema : detectIsProblem(valor);
+            addItem(tema, label, valor, isProb);
+          });
+        }
 
-      if (Array.isArray(st.needs)) {
-        st.needs.forEach(n => {
-          const tema = n.tema || mapCategoryToTheme(n.cat || 'Geral');
-          const label = n.label || n.cat || 'Requisito';
-          const valor = n.valor || n.msg || '';
-          const isProb = (n.problema !== undefined) ? !!n.problema : detectIsProblem(valor);
-          addItem(tema, label, valor, isProb);
+        Object.keys(mapTemas).forEach(k => {
+          temas.push({ tema: k, itens: mapTemas[k] });
         });
       }
 
-      return Object.keys(mapTemas).map(k => ({ tema: k, itens: mapTemas[k] }));
-    }
-
-    function updateLegalBadgeSummary() {
-      const countLbl = document.getElementById('needsCountLbl');
-      if (!countLbl) return;
       let totalProblems = 0;
-      currentTemasEditaveis.forEach(t => {
+      temas.forEach(t => {
         (t.itens || []).forEach(it => { if (it.problema) totalProblems++; });
       });
 
@@ -968,38 +1011,17 @@
         countLbl.style.color = '#166534';
         countLbl.textContent = '✅ Tudo conforme';
       }
-    }
 
-    function renderLegalRequirementsByTheme(st) {
-      const cont = document.getElementById('needsContainer');
-      if (!st) {
+      if (temas.length === 0) {
         cont.innerHTML = `
-          <div class="legal-edit-row ok">
-            <span style="font-weight:700;">Informação</span>
-            <span>Escolhe uma empresa e um edifício acima para ver e editar os temas.</span>
-            <span></span>
-          </div>`;
-        updateLegalBadgeSummary();
-        return;
-      }
-
-      if (!Array.isArray(currentTemasEditaveis) || currentTemasEditaveis.length === 0) {
-        currentTemasEditaveis = buildTemasFromStore(st);
-      }
-
-      updateLegalBadgeSummary();
-
-      if (currentTemasEditaveis.length === 0) {
-        cont.innerHTML = `
-          <div class="legal-edit-row ok">
-            <span style="font-weight:700;">Estado Geral</span>
-            <span>Sem registos ou incumprimentos para esta instalação.</span>
-            <span></span>
+          <div class="info-row ok">
+            <span class="info-label">Estado Geral</span>
+            <span class="info-val">Sem registos ou incumprimentos para esta instalação.</span>
           </div>`;
         return;
       }
 
-      cont.innerHTML = currentTemasEditaveis.map((t, tIdx) => {
+      cont.innerHTML = temas.map(t => {
         const itens = t.itens || [];
         const hasProb = itens.some(it => it.problema);
         const probCount = itens.filter(it => it.problema).length;
@@ -1007,62 +1029,21 @@
           <div class="theme-group ${hasProb ? 'has-problem' : ''}">
             <div class="theme-header">
               <span>${escapeHtml(t.tema)}</span>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span class="theme-badge ${hasProb ? 'problem' : ''}">
-                  ${hasProb ? `${probCount} com problema` : 'Conforme / Info'}
-                </span>
-                <button type="button" class="btn btn-outline btn-xs" onclick="addLegalItem(${tIdx})">+ Item</button>
-              </div>
+              <span class="theme-badge ${hasProb ? 'problem' : ''}">
+                ${hasProb ? `${probCount} com problema` : 'Conforme / Info'}
+              </span>
             </div>
             <div class="theme-items">
-              ${itens.map((it, iIdx) => `
-                <div class="legal-edit-row ${it.problema ? 'problem' : 'ok'}" id="legalRow_${tIdx}_${iIdx}">
-                  <input type="text" class="legal-edit-input" value="${escapeAttr(it.label || '')}" placeholder="Campo" oninput="updateLegalItemField(${tIdx}, ${iIdx}, 'label', this.value)" />
-                  <input type="text" class="legal-edit-input" value="${escapeAttr(it.valor || '')}" placeholder="Detalhe / estado..." oninput="updateLegalItemField(${tIdx}, ${iIdx}, 'valor', this.value)" />
-                  <div class="legal-row-actions">
-                    <button type="button" class="btn btn-xs ${it.problema ? 'btn-danger' : 'btn-green'}" onclick="toggleLegalItemProblem(${tIdx}, ${iIdx})">
-                      ${it.problema ? '⚠️ Problema' : '✅ OK'}
-                    </button>
-                    <button type="button" class="btn btn-outline btn-xs" onclick="removeLegalItem(${tIdx}, ${iIdx})" title="Remover item">✕</button>
-                  </div>
+              ${itens.map(it => `
+                <div class="info-row ${it.problema ? 'problem' : 'ok'}">
+                  <span class="info-label">${escapeHtml(it.label)}</span>
+                  <span class="info-val">${escapeHtml(it.valor || '—')}</span>
                 </div>
               `).join('')}
             </div>
           </div>
         `;
       }).join('');
-    }
-
-    function updateLegalItemField(tIdx, iIdx, field, val) {
-      if (!currentTemasEditaveis[tIdx] || !currentTemasEditaveis[tIdx].itens[iIdx]) return;
-      currentTemasEditaveis[tIdx].itens[iIdx][field] = val;
-      saveLocalState();
-    }
-
-    function toggleLegalItemProblem(tIdx, iIdx) {
-      if (!currentTemasEditaveis[tIdx] || !currentTemasEditaveis[tIdx].itens[iIdx]) return;
-      currentTemasEditaveis[tIdx].itens[iIdx].problema = !currentTemasEditaveis[tIdx].itens[iIdx].problema;
-      renderLegalRequirementsByTheme(storesData[document.getElementById('storeSelect').value] || {});
-      saveLocalState();
-    }
-
-    function addLegalItem(tIdx) {
-      if (!currentTemasEditaveis[tIdx]) return;
-      if (!Array.isArray(currentTemasEditaveis[tIdx].itens)) currentTemasEditaveis[tIdx].itens = [];
-      currentTemasEditaveis[tIdx].itens.push({
-        label: 'Observação',
-        valor: '',
-        problema: false
-      });
-      renderLegalRequirementsByTheme(storesData[document.getElementById('storeSelect').value] || {});
-      saveLocalState();
-    }
-
-    function removeLegalItem(tIdx, iIdx) {
-      if (!currentTemasEditaveis[tIdx] || !Array.isArray(currentTemasEditaveis[tIdx].itens)) return;
-      currentTemasEditaveis[tIdx].itens.splice(iIdx, 1);
-      renderLegalRequirementsByTheme(storesData[document.getElementById('storeSelect').value] || {});
-      saveLocalState();
     }
 
     function mapCategoryToTheme(cat) {
@@ -1093,6 +1074,7 @@
           </td>
           <td>
             <div class="cons-emp-wrap">
+              <span class="no-desktop-lbl" style="display:none;">Empresa:</span>
               <input type="text" class="cons-emp-input" value="${escapeAttr(row.empresa)}" placeholder="Ex: CME / N/A..." oninput="updateConservacaoEmpresa(${idx}, this.value)" />
             </div>
           </td>
@@ -1133,7 +1115,7 @@
     }
 
     function applyTempPhotosForCurrentStore() {
-      const storeName = getCurrentStoreName();
+      const storeName = (document.getElementById('manualStoreName').value || '').trim();
       if (!window.LMSI_FOTOS_TEMP || !storeName) return;
 
       let tempList = window.LMSI_FOTOS_TEMP[storeName];
@@ -1174,24 +1156,279 @@
       }
     }
 
+    function handleExcelOrJsonUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.name.toLowerCase().endsWith('.json')) {
+        const rJson = new FileReader();
+        rJson.onload = (evt) => {
+          try {
+            const parsed = JSON.parse(evt.target.result);
+            if (Array.isArray(parsed)) populateStoresDropdown(parsed, file.name);
+          } catch (err) {
+            alert('Erro ao ler JSON: ' + err.message);
+          }
+        };
+        rJson.readAsText(file, 'utf-8');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const wb = XLSX.read(data, { type: 'array', cellDates: true });
+          const sheetName = wb.SheetNames.find(n => n.toLowerCase().includes('sheet') || n.toLowerCase().includes('cbre')) || wb.SheetNames[0];
+          const ws = wb.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          parseExcelRows(rows, file.name);
+        } catch (err) {
+          alert('Erro ao ler Excel: ' + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function parseExcelRows(rows, fileName) {
+      const list = [];
+      const h1 = rows[0] || [];
+      const h2 = rows[1] || [];
+      for (let r = 2; r < rows.length; r++) {
+        const row = rows[r];
+        if (!row) continue;
+        let emp = String(row[0] || '').trim();
+        let edif = String(row[1] || '').trim();
+        if (!edif || edif.toLowerCase().includes('email')) {
+          emp = String(row[1] || '').trim();
+          edif = String(row[2] || '').trim();
+        }
+        if (!edif) continue;
+        list.push({ rowIndex: r + 1, emp, edif, needs: computeRowNeeds(row, h1, h2) });
+      }
+      populateStoresDropdown(list, fileName);
+    }
+
+    function computeRowNeeds(row, h1, h2) {
+      const list = [];
+      const today = new Date();
+      for (let c = 0; c < h2.length; c++) {
+        const colName = String(h2[c] || '').trim().toLowerCase();
+        const val = row[c];
+        const txt = formatCellVal(val);
+
+        if (colName === 'certificado energético' || colName === 'número') {
+          const exp = row[c + 1];
+          if (!txt || txt.toUpperCase() === 'NÃO' || txt.toUpperCase() === 'PES') {
+            list.push({ tema: 'Certificado Energético (CE)', label: 'Número CE', valor: `Em falta / Não disponível (${txt || 'Vazio'})`, problema: true });
+          } else if (exp instanceof Date && exp < today) {
+            list.push({ tema: 'Certificado Energético (CE)', label: `CE ${txt}`, valor: `Expirado a ${formatCellVal(exp)}`, problema: true });
+          } else {
+            list.push({ tema: 'Certificado Energético (CE)', label: `CE ${txt}`, valor: exp instanceof Date ? `Válido até ${formatCellVal(exp)}` : 'Conforme', problema: false });
+          }
+        }
+        if (colName.includes('plano de manutenção') || colName === 'plano manutenção') {
+          const prob = !txt || txt.toLowerCase().includes('não') || txt.toLowerCase().includes('sem');
+          list.push({ tema: 'Manutenção e Consumos (PMP / RM / RC)', label: 'Plano de Manutenção (PMP)', valor: txt || 'Em falta', problema: prob });
+        }
+        if (colName.includes('registos de manutenção') || colName === 'registos manutenção') {
+          const prob = !txt || txt.toLowerCase().includes('sem') || txt.toLowerCase().includes('não');
+          list.push({ tema: 'Manutenção e Consumos (PMP / RM / RC)', label: 'Registos Manutenção (RM)', valor: txt || 'Em falta', problema: prob });
+        }
+        if (colName.includes('registos de consumo') || colName === 'registos consumo') {
+          const prob = !txt || txt.toLowerCase().includes('sem') || txt.toLowerCase().includes('não');
+          list.push({ tema: 'Manutenção e Consumos (PMP / RM / RC)', label: 'Registos Consumo (RC)', valor: txt || 'Em falta', problema: prob });
+        }
+        if (colName === 'qai conforme' || colName === 'qai') {
+          const prob = txt.toLowerCase().includes('não');
+          list.push({ tema: 'Qualidade do Ar Interior (QAI / ASA)', label: 'QAI', valor: txt || 'Não aplicável / Sem registo', problema: prob });
+        }
+        if (colName === 'radão conforme' || colName === 'radão') {
+          const prob = txt.toLowerCase().includes('não');
+          list.push({ tema: 'Exposição ao Radão', label: 'Radão', valor: txt || 'Sem registo', problema: prob });
+        }
+        if (colName === 'equipamento' && txt && txt !== '-') {
+          for (let k = c + 1; k <= c + 8 && k < row.length; k++) {
+            const subH = String(h2[k] || '').toLowerCase();
+            if (subH.includes('limite') || subH.includes('próxim')) {
+              const dtLim = row[k];
+              if (dtLim instanceof Date) {
+                const vencido = dtLim < today;
+                list.push({
+                  tema: 'Equipamentos e Inspeções',
+                  label: txt,
+                  valor: vencido ? `Inspeção vencida a ${formatCellVal(dtLim)}` : `Próxima inspeção até ${formatCellVal(dtLim)}`,
+                  problema: vencido
+                });
+              }
+            }
+          }
+        }
+      }
+      return list;
+    }
+
+    function formatCellVal(v) {
+      if (v === null || v === undefined) return '';
+      if (v instanceof Date) return v.toLocaleDateString('pt-PT');
+      return String(v).trim();
+    }
+
+    async function handleWordUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      document.getElementById('secOldWord').style.display = 'block';
+      const cont = document.getElementById('oldReportContainer');
+      cont.innerHTML = '<p style="font-size:13px;">A extrair tabela e fotografias do Anexo A do Word...</p>';
+
+      try {
+        const zip = await JSZip.loadAsync(file);
+        const docXml = await zip.file('word/document.xml').async('string');
+        const relsXml = zip.file('word/_rels/document.xml.rels')
+          ? await zip.file('word/_rels/document.xml.rels').async('string')
+          : '';
+
+        const relMap = {};
+        const relParser = new DOMParser();
+        if (relsXml) {
+          const relDoc = relParser.parseFromString(relsXml, 'application/xml');
+          Array.from(relDoc.getElementsByTagName('Relationship')).forEach(r => {
+            relMap[r.getAttribute('Id')] = r.getAttribute('Target');
+          });
+        }
+
+        const xmlDoc = relParser.parseFromString(docXml, 'application/xml');
+        const tables = Array.from(xmlDoc.getElementsByTagName('w:tbl'));
+        oldAnexoItems = [];
+
+        for (const tbl of tables) {
+          const fullText = tbl.textContent || '';
+          if (fullText.toLowerCase().includes('equipamento') &&
+             (fullText.toLowerCase().includes('anomalia') || fullText.toLowerCase().includes('estado'))) {
+            const trs = Array.from(tbl.getElementsByTagName('w:tr'));
+            for (let i = 1; i < trs.length; i++) {
+              const tcs = Array.from(trs[i].getElementsByTagName('w:tc'));
+              if (tcs.length < 2) continue;
+              const eq = extractParagraphsText(tcs[0]);
+              const desc = extractParagraphsText(tcs[1]);
+              const estado = tcs[3] ? extractParagraphsText(tcs[3]) : 'Pendente';
+
+              let anomalia = desc, acao = '';
+              const pAcao = desc.search(/A[çc][ãa]o\s*:/i);
+              if (pAcao >= 0) {
+                anomalia = desc.substring(0, pAcao).replace(/Anomalia\s*:/i, '').trim();
+                acao = desc.substring(pAcao).replace(/A[çc][ãa]o\s*:/i, '').trim();
+              } else {
+                anomalia = desc.replace(/Anomalia\s*:/i, '').trim();
+              }
+
+              let fotoBase64 = '';
+              const blips = Array.from((tcs[2] || trs[i]).getElementsByTagName('a:blip'));
+              if (blips.length > 0) {
+                const rId = blips[0].getAttribute('r:embed');
+                if (rId && relMap[rId]) {
+                  const imgPath = 'word/' + relMap[rId].replace(/^\/+/, '');
+                  const imgFile = zip.file(imgPath);
+                  if (imgFile) {
+                    const b64 = await imgFile.async('base64');
+                    const ext = imgPath.split('.').pop().toLowerCase();
+                    const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+                    fotoBase64 = `data:${mime};base64,${b64}`;
+                  }
+                }
+              }
+
+              if (eq || anomalia || fotoBase64) {
+                oldAnexoItems.push({ eq, anomalia, acao, estado, foto: fotoBase64 });
+              }
+            }
+            break;
+          }
+        }
+        renderOldReportItems(file.name);
+        switchPage('evidencias');
+      } catch (err) {
+        cont.innerHTML = `<p style="color:var(--danger); font-size:13px;">Erro ao ler Word: ${err.message}</p>`;
+      }
+    }
+
+    function extractParagraphsText(tcNode) {
+      const ps = Array.from(tcNode.getElementsByTagName('w:p'));
+      return ps.map(p => p.textContent.trim()).filter(Boolean).join('\n');
+    }
+
+    function renderOldReportItems(fileName) {
+      const cont = document.getElementById('oldReportContainer');
+      if (oldAnexoItems.length === 0) {
+        cont.innerHTML = `<p style="font-size:13px; color:var(--muted);">Nenhuma tabela de Anexo A encontrada em <b>${escapeHtml(fileName)}</b>.</p>`;
+        return;
+      }
+      cont.innerHTML = oldAnexoItems.map((it, idx) => `
+        <div class="old-item">
+          <div>
+            ${it.foto ? `<img src="${it.foto}" alt="Foto Antiga" />` : '<div style="width:100px;height:85px;background:#e2e8f0;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#64748b;">Sem Foto</div>'}
+          </div>
+          <div>
+            <div style="font-weight:700; color:var(--primary); margin-bottom:4px;">${escapeHtml(it.eq || 'Equipamento s/ nome')} <span style="font-size:11px; color:var(--muted);">(${escapeHtml(it.estado)})</span></div>
+            <div style="font-size:12px; margin-bottom:4px;"><b>Anomalia:</b> ${escapeHtml(it.anomalia)}</div>
+            <div style="font-size:12px; margin-bottom:8px;"><b>Ação:</b> ${escapeHtml(it.acao)}</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button type="button" class="btn btn-amber" style="padding:6px 10px; font-size:12px;" onclick="sendOldToAnexo(${idx}, 'Não Resolvido')">Manter Pendente no Anexo A</button>
+              <button type="button" class="btn btn-green" style="padding:6px 10px; font-size:12px;" onclick="sendOldToAnexo(${idx}, 'Resolvido')">✅ Já Resolvido</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function sendOldToAnexo(idx, novoEstado) {
+      const it = oldAnexoItems[idx];
+      if (!it) return;
+      const emptyRow = anexoRows.find(r => !r.eq && !r.anomalia && !r.foto);
+      if (emptyRow) {
+        emptyRow.eq = it.eq;
+        emptyRow.anomalia = it.anomalia;
+        emptyRow.acao = it.acao;
+        emptyRow.foto = it.foto;
+        emptyRow.estado = novoEstado;
+      } else {
+        anexoRows.push({
+          id: Date.now() + Math.random(),
+          eq: it.eq,
+          anomalia: it.anomalia,
+          acao: it.acao,
+          foto: it.foto,
+          estado: novoEstado
+        });
+      }
+      renderAnexoRows();
+      saveLocalState();
+    }
+
+    function passAllOldToAnexo() {
+      if (!oldAnexoItems.length) return;
+      oldAnexoItems.forEach((_, idx) => sendOldToAnexo(idx, 'Não Resolvido'));
+    }
+
     function renderAnexoRows() {
       const tbody = document.getElementById('anexoBody');
       tbody.innerHTML = anexoRows.map((row, i) => `
-        <tr>
+        <tr id="anexoRow_${i}">
           <td>
             <label class="field-lbl">Equipamento</label>
-            <input type="text" class="eq-input-large" value="${escapeAttr(row.eq)}" placeholder="Ex: UTA 1 / Quadro..." oninput="updateRow(${i}, 'eq', this.value)" />
-            <div style="margin-top:8px;">
+            <input type="text" value="${escapeAttr(row.eq)}" placeholder="Ex: UTA 1 / Quadro..." oninput="updateRow(${i}, 'eq', this.value)" />
+            <div class="no-print" style="margin-top:8px;">
               <button type="button" class="btn btn-danger" style="padding:5px 9px; font-size:11px;" onclick="removeAnexoRow(${i})">🗑️ Apagar</button>
             </div>
           </td>
           <td>
             <div class="desc-label">
               <span>Anomalia:</span>
+              <button type="button" class="btn btn-outline no-print" style="padding:3px 8px; font-size:11px;" onclick="startVoice(${i}, 'anomalia')">🎙️ Ditar</button>
             </div>
             <textarea placeholder="Descreve a anomalia..." oninput="updateRow(${i}, 'anomalia', this.value)">${escapeHtml(row.anomalia)}</textarea>
             <div class="desc-label" style="margin-top:8px;">
               <span>Ação:</span>
+              <button type="button" class="btn btn-outline no-print" style="padding:3px 8px; font-size:11px;" onclick="startVoice(${i}, 'acao')">🎙️ Ditar</button>
             </div>
             <textarea placeholder="Descreve a ação recomendada..." oninput="updateRow(${i}, 'acao', this.value)">${escapeHtml(row.acao)}</textarea>
           </td>
@@ -1201,7 +1438,7 @@
                 ? `<img src="${row.foto}" class="photo-preview" />`
                 : '<div class="photo-preview" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">Sem fotografia</div>'
               }
-              <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
+              <div class="no-print" style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
                 <label class="btn btn-green" style="padding:7px 11px; font-size:12px;">
                   📷 Câmara / Foto
                   <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handleRowPhoto(event, ${i})" />
@@ -1233,14 +1470,14 @@
     }
 
     function addAnexoRow() {
-      anexoRows.push({ id: Date.now() + Math.random(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' });
+      anexoRows.push(createEmptyAnexoRow());
       renderAnexoRows();
       saveLocalState();
     }
 
     function removeAnexoRow(idx) {
       if (anexoRows.length <= 1) {
-        anexoRows[0] = { id: Date.now() + Math.random(), eq: '', anomalia: '', acao: '', foto: '', estado: 'Não Resolvido' };
+        anexoRows[0] = createEmptyAnexoRow();
       } else {
         anexoRows.splice(idx, 1);
       }
@@ -1249,13 +1486,14 @@
     }
 
     function handleRowPhoto(e, idx) {
-      const file = e.target.files && e.target.files[0];
-      if (!file || !anexoRows[idx]) return;
-      compressImage(file, 680, 0.60, (dataUrl) => {
-        anexoRows[idx].foto = dataUrl || '';
+      const file = e.target.files[0];
+      if (!file) return;
+      compressImage(file, 850, 0.72, (dataUrl) => {
+        anexoRows[idx].foto = dataUrl;
         renderAnexoRows();
         saveLocalState();
       });
+      e.target.value = '';
     }
 
     function quickCameraRow() {
@@ -1263,20 +1501,26 @@
     }
 
     function handleQuickCam(e) {
-      const file = e.target.files && e.target.files[0];
+      const file = e.target.files[0];
       if (!file) return;
-      compressImage(file, 680, 0.60, (dataUrl) => {
-        const emptyRow = anexoRows.find(r => !r.foto && !r.eq && !r.anomalia && !r.acao);
-        if (emptyRow) {
-          emptyRow.foto = dataUrl || '';
+      compressImage(file, 850, 0.72, (dataUrl) => {
+        let targetIdx = anexoRows.findIndex(r => !r.foto && !r.eq && !r.anomalia && !r.acao);
+        if (targetIdx >= 0) {
+          anexoRows[targetIdx].foto = dataUrl;
         } else {
-          anexoRows.push({ id: Date.now() + Math.random(), eq: '', anomalia: '', acao: '', foto: dataUrl || '', estado: 'Não Resolvido' });
+          anexoRows.push({ id: Date.now() + Math.random(), eq: '', anomalia: '', acao: '', foto: dataUrl, estado: 'Não Resolvido' });
+          targetIdx = anexoRows.length - 1;
         }
         renderAnexoRows();
         saveLocalState();
-        const sec = document.getElementById('secAnexoA');
-        if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Leva apenas até à linha onde surgiu esta nova constatação/foto
+        const rowEl = document.getElementById(`anexoRow_${targetIdx}`);
+        if (rowEl) {
+          rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       });
+      e.target.value = '';
     }
 
     function compressImage(file, maxW, quality, callback) {
@@ -1292,91 +1536,216 @@
           ctx.drawImage(img, 0, 0, w, h);
           callback(canvas.toDataURL('image/jpeg', quality));
         };
-        img.onerror = function() {
-          callback(typeof evt.target.result === 'string' ? evt.target.result : '');
-        };
         img.src = evt.target.result;
-      };
-      reader.onerror = function() {
-        callback('');
       };
       reader.readAsDataURL(file);
     }
 
-    async function exportVisitPackage() {
+    function startVoice(idx, field) {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) return alert('O teu navegador não suporta ditado por voz direto. Usa o microfone do teclado do telemóvel.');
+      const rec = new SpeechRec();
+      rec.lang = 'pt-PT';
+      rec.interimResults = false;
+      rec.onresult = (e) => {
+        const txt = e.results[0][0].transcript;
+        anexoRows[idx][field] = (anexoRows[idx][field] ? anexoRows[idx][field] + ' ' : '') + txt;
+        renderAnexoRows();
+        saveLocalState();
+      };
+      rec.start();
+    }
+
+    function startVoiceNotes() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) return alert('O teu navegador não suporta ditado por voz direto. Usa o microfone do teclado do telemóvel.');
+      const rec = new SpeechRec();
+      rec.lang = 'pt-PT';
+      rec.interimResults = false;
+      rec.onresult = (e) => {
+        const txt = e.results[0][0].transcript;
+        const el = document.getElementById('auditorNotesInput');
+        el.value = (el.value ? el.value + '\n' : '') + txt;
+        saveLocalState();
+      };
+      rec.start();
+    }
+
+    async function exportVisitPackage(mode = 'complete') {
       saveCurrentStoreDraft();
-      const storeName = (getCurrentStoreName() || 'Visita_LMSI').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const isPart = (mode === 'part');
+      const partNum = currentPartNumber;
+      const storeName = (document.getElementById('manualStoreName').value || 'Visita_LMSI').replace(/[^a-zA-Z0-9_-]/g, '_');
       const techSlug = slugifyTech(currentTech);
       const dt = document.getElementById('visitDate').value || new Date().toISOString().slice(0, 10);
-      const cleanAnexoRows = anexoRows.map(r => ({
-        id: r.id || Date.now() + Math.random(),
-        eq: r.eq || '',
-        anomalia: r.anomalia || '',
-        acao: r.acao || '',
-        foto: r.foto || '',
-        estado: r.estado || 'Não Resolvido'
-      }));
-      const fotosCount = cleanAnexoRows.filter(r => r.foto && String(r.foto).trim() !== '').length;
 
       const payload = {
         auditor: currentTech,
         technician: currentTech,
-        storeName: getCurrentStoreName(),
+        storeName: document.getElementById('manualStoreName').value,
         visitDate: dt,
-        temasEditaveis: currentTemasEditaveis,
+        exportMode: isPart ? 'parte' : 'completo',
+        parte: partNum,
         conservacaoRows,
-        anexoRows: cleanAnexoRows,
+        anexoRows,
         auditorNotes: document.getElementById('auditorNotesInput').value || '',
         allStoresToday: visitsByStore,
         savedAt: new Date().toISOString()
       };
-      const fileName = `Visita_${storeName}_${techSlug}_${dt}.json`;
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-      const file = new File([blob], fileName, { type: 'application/json' });
 
-      if (typeof navigator.share === 'function') {
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const suffix = isPart
+        ? `parte_${partNum}`
+        : (partNum > 1 ? `parte_${partNum}_completo` : 'completo');
+      const fileName = `Visita_${storeName}_${techSlug}_${dt}_${suffix}.json`;
+
+      if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'application/json' })] })) {
         try {
           await navigator.share({
             title: fileName,
-            text: `Pacote de Visita Técnica LMSI (${currentTech}) — ${fotosCount} foto(s) no Anexo A`,
-            files: [file]
+            text: `Pacote de Visita Técnica LMSI (${currentTech}) - ${suffix}`,
+            files: [new File([blob], fileName, { type: 'application/json' })]
           });
-          return;
-        } catch (err) {
-          if (err && err.name === 'AbortError') return;
+        } catch (_) {
+          triggerBlobDownload(blob, fileName);
         }
+      } else {
+        triggerBlobDownload(blob, fileName);
       }
 
-      const url = URL.createObjectURL(blob);
+      // Guarda o que está no anexo e apaga/limpa este para libertar memória
+      anexoRows = [createEmptyAnexoRow()];
+      const edifKey = (document.getElementById('manualStoreName').value || '').trim();
+      if (edifKey && visitsByStore[edifKey]) {
+        visitsByStore[edifKey].anexoRows = JSON.parse(JSON.stringify(anexoRows));
+      }
+
+      if (isPart) {
+        currentPartNumber = partNum + 1;
+      } else {
+        currentPartNumber = 1;
+      }
+
+      updatePartCounterLabel();
+      renderAnexoRows();
+      saveLocalState();
+      checkMemoryWarning();
+    }
+
+    function triggerBlobDownload(blob, fileName) {
       const a = document.createElement('a');
-      a.href = url;
+      a.href = URL.createObjectURL(blob);
       a.download = fileName;
-      document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      alert(`JSON guardado (${cleanAnexoRows.length} linha(s) e ${fotosCount} foto(s) no Anexo A).`);
+    }
+
+    function importVisitPackage(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const data = JSON.parse(evt.target.result);
+          if (data.storeName) document.getElementById('manualStoreName').value = data.storeName;
+          if (data.visitDate) document.getElementById('visitDate').value = data.visitDate;
+          if (Array.isArray(data.conservacaoRows)) {
+            conservacaoRows = data.conservacaoRows;
+            renderConservacaoTable();
+          }
+          if (Array.isArray(data.anexoRows) && data.anexoRows.length) {
+            anexoRows = data.anexoRows;
+            renderAnexoRows();
+          }
+          if (typeof data.auditorNotes === 'string') {
+            auditorNotes = data.auditorNotes;
+            document.getElementById('auditorNotesInput').value = auditorNotes;
+          }
+          if (data.allStoresToday && typeof data.allStoresToday === 'object') {
+            visitsByStore = Object.assign({}, visitsByStore, data.allStoresToday);
+            updateRondaCounter();
+          }
+          if (data.exportMode === 'parte' && Number(data.parte) >= 1) {
+            currentPartNumber = Number(data.parte) + 1;
+          } else {
+            currentPartNumber = 1;
+          }
+          updatePartCounterLabel();
+          saveLocalState();
+          checkMemoryWarning();
+          alert('Visita carregada com sucesso!');
+        } catch (err) {
+          alert('Ficheiro de visita inválido: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    async function copyTableForWord() {
+      let html = '<table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse; width:100%; font-family:Calibri, Arial, sans-serif; font-size:11pt;"><thead><tr style="background-color:#7F7F7F; color:#FFFFFF; font-weight:bold; text-align:center;"><th style="width:18%;">Equipamento</th><th style="width:38%;">Descrição</th><th style="width:28%;">Foto</th><th style="width:16%;">Estado</th></tr></thead><tbody>';
+      anexoRows.forEach(r => {
+        if (!r.eq && !r.anomalia && !r.acao && !r.foto) return;
+        html += `<tr><td style="vertical-align:top;">${escapeHtml(r.eq)}</td><td style="vertical-align:top;"><b>Anomalia:</b><br/>${escapeHtml(r.anomalia).replace(/\n/g, '<br/>')}<br/><br/><b>Ação:</b><br/>${escapeHtml(r.acao).replace(/\n/g, '<br/>')}</td><td style="text-align:center; vertical-align:middle;">${r.foto ? `<img src="${r.foto}" width="190" style="max-width:190px; height:auto;" />` : ''}</td><td style="text-align:center; vertical-align:middle;">${escapeHtml(r.estado)}</td></tr>`;
+      });
+      html += '</tbody></table>';
+
+      try {
+        const blobHtml = new Blob([html], { type: 'text/html' });
+        const blobText = new Blob([html.replace(/<[^>]+>/g, ' ')], { type: 'text/plain' });
+        await navigator.clipboard.write([new ClipboardItem({ 'text/html': blobHtml, 'text/plain': blobText })]);
+        alert('Tabela do Anexo A copiada! Abre o teu relatório Word e faz Ctrl + V (Colar).');
+      } catch (err) {
+        alert('Não foi possível copiar automaticamente: ' + err.message);
+      }
+    }
+
+    function checkMemoryWarning(storageQuotaFailed = false) {
+      const banner = document.getElementById('memoryWarningBanner');
+      const txtEl = document.getElementById('memoryWarningText');
+      if (!banner || !txtEl) return;
+
+      let approxBytes = 0;
+      try {
+        const snap = JSON.stringify({
+          conservacaoRows,
+          anexoRows,
+          auditorNotes: document.getElementById('auditorNotesInput')?.value || '',
+          visitsByStore
+        });
+        approxBytes = new Blob([snap]).size;
+      } catch (_) {}
+
+      const mb = (approxBytes / (1024 * 1024)).toFixed(1);
+
+      if (storageQuotaFailed || approxBytes >= MEMORY_CRIT_BYTES) {
+        banner.classList.add('visible', 'critical');
+        txtEl.textContent = `🚨 Memória quase esgotada (~${mb} MB em fotos/dados). Guarda já como Parte para não perder nada!`;
+      } else if (approxBytes >= MEMORY_WARN_BYTES) {
+        banner.classList.add('visible');
+        banner.classList.remove('critical');
+        txtEl.textContent = `⚠️ Aviso de memória: já tens ~${mb} MB acumulados. Considera guardar como Parte em breve.`;
+      } else {
+        banner.classList.remove('visible', 'critical');
+      }
     }
 
     function saveLocalState() {
       saveCurrentStoreDraft();
       if (!currentTech) return;
+      let quotaFailed = false;
       try {
         localStorage.setItem(getStorageKey(), JSON.stringify({
-          storeName: getCurrentStoreName(),
+          storeName: document.getElementById('manualStoreName').value,
           visitDate: document.getElementById('visitDate').value,
-          temasEditaveis: currentTemasEditaveis,
+          currentPartNumber,
           conservacaoRows,
           anexoRows,
           auditorNotes: document.getElementById('auditorNotesInput').value || '',
           visitsByStore
         }));
-      } catch (err) {
-        if (!storageQuotaWarningShown) {
-          storageQuotaWarningShown = true;
-          alert('Aviso: o armazenamento local do navegador atingiu o limite de espaço devido ao tamanho das fotos. Os dados continuam em memória para exportar o JSON, mas recomenda-se guardar a visita agora.');
-        }
+      } catch (_) {
+        quotaFailed = true;
       }
+      checkMemoryWarning(quotaFailed);
     }
 
     function loadLocalState() {
@@ -1385,15 +1754,12 @@
         const raw = localStorage.getItem(getStorageKey());
         if (!raw) return;
         const data = JSON.parse(raw);
-        if (data.storeName) setCurrentStoreName(data.storeName);
+        if (data.storeName) document.getElementById('manualStoreName').value = data.storeName;
         if (data.visitDate) document.getElementById('visitDate').value = data.visitDate;
+        if (Number(data.currentPartNumber) >= 1) currentPartNumber = Number(data.currentPartNumber);
         if (data.visitsByStore && typeof data.visitsByStore === 'object') visitsByStore = data.visitsByStore;
-        if (Array.isArray(data.temasEditaveis) && data.temasEditaveis.length) currentTemasEditaveis = data.temasEditaveis;
         if (Array.isArray(data.conservacaoRows) && data.conservacaoRows.length) conservacaoRows = data.conservacaoRows;
-        if (Array.isArray(data.anexoRows) && data.anexoRows.length) {
-          const hasContent = data.anexoRows.some(r => (r.eq && r.eq.trim()) || (r.anomalia && r.anomalia.trim()) || (r.acao && r.acao.trim()) || r.foto);
-          anexoRows = hasContent ? data.anexoRows : createDefaultAnexoRows();
-        }
+        if (Array.isArray(data.anexoRows) && data.anexoRows.length) anexoRows = data.anexoRows;
         if (typeof data.auditorNotes === 'string') {
           auditorNotes = data.auditorNotes;
           document.getElementById('auditorNotesInput').value = auditorNotes;
