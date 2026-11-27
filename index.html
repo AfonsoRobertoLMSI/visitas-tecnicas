@@ -168,6 +168,31 @@
     .ronda-meta-row {
       margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between;
     }
+    .inst-flow-bar {
+      margin-top: 10px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 12.5px;
+    }
+    .inst-status-pill {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 11.5px;
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .inst-status-pill.saved {
+      background: #dcfce7;
+      color: #166534;
+    }
     .badge-inline {
       font-size: 12px; font-weight: 600; color: var(--primary); background: #eff6ff;
       padding: 4px 10px; border-radius: 999px;
@@ -330,6 +355,31 @@
       width: 180px; max-width: 100%; height: 135px; object-fit: contain;
       border: 1px dashed #94a3b8; border-radius: 8px; background: #f8fafc;
     }
+    .estado-combo-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .estado-quick-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .estado-pill-btn {
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text);
+      border-radius: 6px;
+      padding: 4px 7px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .estado-pill-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
     @media (max-width: 768px) {
       table.anexo-table thead { display: none; }
       table.anexo-table, table.anexo-table tbody, table.anexo-table tr, table.anexo-table td {
@@ -470,7 +520,7 @@
 
         <div>
           <label class="field-lbl" for="visitDate">Data da Visita</label>
-          <input type="date" id="visitDate" onchange="saveLocalState()" />
+          <input type="date" id="visitDate" onchange="markDirtyAndSave()" />
         </div>
 
         <div>
@@ -481,6 +531,14 @@
       <div class="ronda-meta-row">
         <span class="badge-inline" id="currentEdifSummary">Edifício: —</span>
         <span style="font-size:12px; color:var(--muted);" id="rondaCounterLbl">Instalações trabalhadas hoje: 0</span>
+      </div>
+
+      <div class="inst-flow-bar">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <span><strong>Fluxo por instalação:</strong> cada JSON exportado corresponde a <strong>esta instalação</strong>.</span>
+          <span class="inst-status-pill" id="instSaveStatusBadge">Por gravar nesta instalação</span>
+        </div>
+        <button type="button" class="btn btn-amber btn-xs" onclick="openSaveOptionsModal()">💾 Gravar Instalação Atual</button>
       </div>
     </div>
 
@@ -547,9 +605,9 @@
           <thead>
             <tr>
               <th style="width:20%;">Equipamento</th>
-              <th style="width:36%;">Descrição (Anomalia / Ação)</th>
-              <th style="width:28%;">Foto</th>
-              <th style="width:16%;">Estado</th>
+              <th style="width:34%;">Descrição (Anomalia / Ação)</th>
+              <th style="width:26%;">Foto</th>
+              <th style="width:20%;">Estado</th>
             </tr>
           </thead>
           <tbody id="anexoBody"></tbody>
@@ -562,19 +620,19 @@
   <!-- Modal Partes vs Completo -->
   <div id="saveOptionsModal" class="modal-backdrop" onclick="closeSaveOptionsModal(event)">
     <div class="modal-card" onclick="event.stopPropagation()">
-      <h3>💾 Como queres guardar esta visita?</h3>
+      <h3>💾 Gravar Visita — <span id="modalStoreName">Instalação Atual</span></h3>
       <p id="saveModalSummary">
-        Podes guardar por partes (continuações) para libertar memória do anexo e terminar no último ficheiro como <strong>Completo</strong>.
+        O ficheiro JSON gravado é <strong>desta instalação</strong>. Podes guardar por <strong>Parte</strong> (continuação) e terminar no último envio como <strong>Completo</strong> antes de avançar para a próxima instalação.
       </p>
       <div class="modal-actions">
         <button type="button" class="btn btn-amber" onclick="exportVisitPart()">
           🧩 Guardar Continuação (Parte <span id="modalNextPartNum">1</span>) e Limpar Anexo
         </button>
-        <button type="button" class="btn btn-green" onclick="exportVisitComplete(false)">
-          ✅ Guardar como Completo (Manter Anexo)
+        <button type="button" class="btn btn-green" onclick="exportVisitComplete(false, false)">
+          ✅ Guardar Instalação como Completo (Manter Anexo)
         </button>
-        <button type="button" class="btn btn-teal" onclick="exportVisitComplete(true)">
-          🏁 Guardar como Completo e Limpar Anexo
+        <button type="button" class="btn btn-teal" onclick="exportVisitComplete(true, true)">
+          🏁 Guardar Completo e Passar à Próxima Instalação
         </button>
         <button type="button" class="btn btn-outline" onclick="closeSaveOptionsModal()">Cancelar</button>
       </div>
@@ -614,9 +672,21 @@
       { id: 'nao_aplicavel', label: 'Não aplicável', color: '#808080', type: 'star' }
     ];
 
-    // Limites preventivos antes de o navegador atingir limite de memoria/storage
-    const MEMORY_WARN_BYTES = 3.8 * 1024 * 1024;      // ~3.8 MB de payload/fotos
-    const MEMORY_CRITICAL_BYTES = 5.5 * 1024 * 1024;  // ~5.5 MB critico
+    const ESTADOS_ANEXO_BASE = [
+      'Novo',
+      'Mantém-se',
+      'Informativo',
+      'Em curso'
+    ];
+
+    const ESTADOS_CERTIFICADOS_EXTRA = [
+      'Exposto',
+      'Não Exposto',
+      'Exposto mas Expirado'
+    ];
+
+    const MEMORY_WARN_BYTES = 3.8 * 1024 * 1024;
+    const MEMORY_CRITICAL_BYTES = 5.5 * 1024 * 1024;
 
     let currentTech = '';
     let activePage = 'legais';
@@ -625,10 +695,12 @@
     let visitsByStore = {};
     let currentStoreName = '';
     let partCounterBySession = {};
+    let exportedSummaryBySession = {};
+    let hasUnsavedStoreChanges = false;
     let highlightedRowId = null;
 
     let conservacaoRows = createDefaultConservacao();
-    let anexoRows = [createEmptyAnexoRow()];
+    let anexoRows = createDefaultAnexoRows(true);
     let auditorNotes = '';
 
     function createEmptyAnexoRow() {
@@ -638,8 +710,47 @@
         anomalia: '',
         acao: '',
         foto: '',
-        estado: 'Não Resolvido'
+        estado: 'Novo'
       };
+    }
+
+    function isCertificadoOuElevador(eqText) {
+      const norm = normalizarTexto(eqText);
+      return (
+        norm === 'certificado energetico exposto' ||
+        norm === 'certificado de inspecao do elevador exposto'
+      );
+    }
+
+    function getEstadoOptionsForRow(row) {
+      if (isCertificadoOuElevador(row.eq)) {
+        return [...ESTADOS_CERTIFICADOS_EXTRA, ...ESTADOS_ANEXO_BASE];
+      }
+      return [...ESTADOS_ANEXO_BASE];
+    }
+
+    function createDefaultAnexoRows(includeFirstPartDefaults) {
+      if (!includeFirstPartDefaults) {
+        return [createEmptyAnexoRow()];
+      }
+      return [
+        {
+          id: Date.now() + Math.random(),
+          eq: 'Certificado Energético Exposto',
+          anomalia: '',
+          acao: '',
+          foto: '',
+          estado: 'Exposto'
+        },
+        {
+          id: Date.now() + Math.random() + 1,
+          eq: 'Certificado de Inspeção do Elevador Exposto',
+          anomalia: '',
+          acao: '',
+          foto: '',
+          estado: 'Exposto'
+        }
+      ];
     }
 
     function createDefaultConservacao() {
@@ -655,6 +766,7 @@
       if (dateEl && !dateEl.value) dateEl.valueAsDate = new Date();
       renderConservacaoTable();
       renderAnexoRows();
+      refreshInstallationFlowBadge();
 
       const savedTech = localStorage.getItem('lmsi_tech_name') || '';
       const pinOk = localStorage.getItem('lmsi_pin_ok') === '1';
@@ -748,12 +860,42 @@
       return curr + 1;
     }
 
+    function isFirstPartSession() {
+      return getNextPartNumber() === 1;
+    }
+
     function refreshPartBadge() {
       const nextNum = getNextPartNumber();
       const badge = document.getElementById('partCounterBadge');
       const modalNum = document.getElementById('modalNextPartNum');
       if (badge) badge.textContent = `Próxima: Parte ${nextNum}`;
       if (modalNum) modalNum.textContent = String(nextNum);
+    }
+
+    function refreshInstallationFlowBadge() {
+      const pill = document.getElementById('instSaveStatusBadge');
+      if (!pill) return;
+      const key = getPartSessionKey();
+      const lastExp = exportedSummaryBySession[key];
+
+      if (hasUnsavedStoreChanges) {
+        pill.className = 'inst-status-pill';
+        pill.textContent = lastExp
+          ? `Alterações pendentes após ${lastExp}`
+          : 'Por gravar nesta instalação';
+      } else if (lastExp) {
+        pill.className = 'inst-status-pill saved';
+        pill.textContent = `Gravado (${lastExp})`;
+      } else {
+        pill.className = 'inst-status-pill';
+        pill.textContent = 'Por gravar nesta instalação';
+      }
+    }
+
+    function markDirtyAndSave() {
+      hasUnsavedStoreChanges = true;
+      refreshInstallationFlowBadge();
+      saveLocalState();
     }
 
     function initTechnicianSession(tech) {
@@ -765,12 +907,14 @@
 
       visitsByStore = {};
       conservacaoRows = createDefaultConservacao();
-      anexoRows = [createEmptyAnexoRow()];
+      anexoRows = createDefaultAnexoRows(true);
       auditorNotes = '';
       currentStoreName = '';
+      hasUnsavedStoreChanges = false;
 
       loadLocalState();
       refreshPartBadge();
+      refreshInstallationFlowBadge();
       renderConservacaoTable();
       renderAnexoRows();
       updateRondaCounter();
@@ -892,6 +1036,9 @@
         div.className = 'edificio-option-item' + (String(idx) === String(sel.value) ? ' active' : '');
         div.innerHTML = `<span>${escapeHtml(st.edif)}</span><span style="font-size:11px; color:var(--muted);">${escapeHtml(st.emp || '')}</span>`;
         div.onclick = () => {
+          if (String(idx) !== String(sel.value) && !confirmLeaveCurrentStoreIfDirty()) {
+            return;
+          }
           sel.value = idx;
           document.getElementById('edificioMenu').classList.remove('open');
           onStoreChange();
@@ -907,7 +1054,16 @@
       }
     }
 
+    function confirmLeaveCurrentStoreIfDirty() {
+      if (!currentStoreName || !hasUnsavedStoreChanges) return true;
+      return confirm(
+        `A instalação "${currentStoreName}" tem alterações/fotos ainda não guardadas em JSON.\n` +
+        `Queres mudar de instalação mesmo assim? (Recomendado clicar em "Gravar Instalação Atual" primeiro)`
+      );
+    }
+
     function nextVisitInstallation() {
+      if (!confirmLeaveCurrentStoreIfDirty()) return;
       saveCurrentStoreDraft();
       const sel = document.getElementById('storeSelect');
       if (filteredStoreIndices.length > 0) {
@@ -921,8 +1077,10 @@
         onStoreChange();
       } else {
         conservacaoRows = createDefaultConservacao();
-        anexoRows = [createEmptyAnexoRow()];
+        anexoRows = createDefaultAnexoRows(isFirstPartSession());
         auditorNotes = '';
+        hasUnsavedStoreChanges = false;
+        refreshInstallationFlowBadge();
         renderConservacaoTable();
         renderAnexoRows();
         saveLocalState();
@@ -954,6 +1112,7 @@
       if (idx === '' || !storesData[idx]) return;
       const st = storesData[idx];
       currentStoreName = st.edif || '';
+      hasUnsavedStoreChanges = false;
       document.getElementById('edificioTriggerText').textContent = currentStoreName || 'Edifício';
       document.getElementById('currentEdifSummary').textContent = `Edifício: ${currentStoreName || '—'} (${st.emp || '—'})`;
 
@@ -967,15 +1126,16 @@
           : createDefaultConservacaoFromStore(st);
         anexoRows = Array.isArray(saved.anexoRows) && saved.anexoRows.length
           ? JSON.parse(JSON.stringify(saved.anexoRows))
-          : [createEmptyAnexoRow()];
+          : createDefaultAnexoRows(isFirstPartSession());
         auditorNotes = saved.auditorNotes || '';
       } else {
         conservacaoRows = createDefaultConservacaoFromStore(st);
-        anexoRows = [createEmptyAnexoRow()];
+        anexoRows = createDefaultAnexoRows(isFirstPartSession());
         auditorNotes = '';
       }
 
       refreshPartBadge();
+      refreshInstallationFlowBadge();
       applyTempPhotosForCurrentStore();
       renderConservacaoTable();
       renderAnexoRows();
@@ -1114,7 +1274,7 @@
       const st = getActiveStoreObj();
       if (!st || !st.temas[tIdx] || !st.temas[tIdx].itens[iIdx]) return;
       st.temas[tIdx].itens[iIdx][field] = val;
-      saveLocalState();
+      markDirtyAndSave();
     }
 
     function toggleLegalProblem(tIdx, iIdx) {
@@ -1122,7 +1282,7 @@
       if (!st || !st.temas[tIdx] || !st.temas[tIdx].itens[iIdx]) return;
       st.temas[tIdx].itens[iIdx].problema = !st.temas[tIdx].itens[iIdx].problema;
       renderLegalRequirementsByTheme(st);
-      saveLocalState();
+      markDirtyAndSave();
     }
 
     function addLegalItem(tIdx) {
@@ -1130,7 +1290,7 @@
       if (!st || !st.temas[tIdx]) return;
       st.temas[tIdx].itens.push({ label: 'Novo apontamento', valor: '', problema: false });
       renderLegalRequirementsByTheme(st);
-      saveLocalState();
+      markDirtyAndSave();
     }
 
     function mapCategoryToTheme(cat) {
@@ -1151,7 +1311,6 @@
       return m.includes('fora de prazo') || m.includes('vencid') || m.includes('falta') || m.includes('incumpr') || m.includes('expirad');
     }
 
-    /* Tabela Estado de Conservacao */
     function renderConservacaoTable() {
       const tbody = document.getElementById('conservacaoBody');
       if (!tbody) return;
@@ -1191,14 +1350,14 @@
     function updateConservacaoEmpresa(idx, val) {
       if (!conservacaoRows[idx]) return;
       conservacaoRows[idx].empresa = val;
-      saveLocalState();
+      markDirtyAndSave();
     }
 
     function setConservacaoEstado(idx, estadoId) {
       if (!conservacaoRows[idx]) return;
       conservacaoRows[idx].estado = (conservacaoRows[idx].estado === estadoId) ? '' : estadoId;
       renderConservacaoTable();
-      saveLocalState();
+      markDirtyAndSave();
     }
 
     function applyTempPhotosForCurrentStore() {
@@ -1224,11 +1383,11 @@
         anomalia: item.anomalia || '',
         acao: item.acao || '',
         foto: item.foto || '',
-        estado: item.estado || 'Não Resolvido'
+        estado: item.estado || 'Novo'
       })).filter(it => it.eq || it.anomalia || it.acao || it.foto);
 
       if (novosItens.length > 0) {
-        const jaTemDadosManuais = anexoRows.some(r => r.eq || r.anomalia || r.acao || r.foto);
+        const jaTemDadosManuais = anexoRows.some(r => r.anomalia || r.acao || r.foto || (r.eq && !isCertificadoOuElevador(r.eq)));
         if (!jaTemDadosManuais) {
           anexoRows = novosItens;
         } else {
@@ -1243,12 +1402,13 @@
       }
     }
 
-    /* Tabela Anexo A */
     function renderAnexoRows() {
       const tbody = document.getElementById('anexoBody');
       if (!tbody) return;
       tbody.innerHTML = anexoRows.map((row, i) => {
         const isHighlighted = highlightedRowId && String(row.id) === String(highlightedRowId);
+        const optionsList = getEstadoOptionsForRow(row);
+        const datalistId = `estado-list-${i}`;
         return `
           <tr id="anexo-row-${row.id}" class="${isHighlighted ? 'anexo-row-highlight' : ''}">
             <td>
@@ -1283,13 +1443,30 @@
               </div>
             </td>
             <td>
-              <label class="field-lbl">Estado</label>
-              <select onchange="updateRow(${i}, 'estado', this.value)">
-                <option value="Não Resolvido" ${row.estado === 'Não Resolvido' ? 'selected' : ''}>Não Resolvido</option>
-                <option value="Resolvido" ${row.estado === 'Resolvido' ? 'selected' : ''}>Resolvido</option>
-                <option value="Em Curso" ${row.estado === 'Em Curso' ? 'selected' : ''}>Em Curso</option>
-                <option value="Informativo / OK" ${row.estado === 'Informativo / OK' ? 'selected' : ''}>Informativo / OK</option>
-              </select>
+              <label class="field-lbl">Estado (escolher ou escrever)</label>
+              <div class="estado-combo-wrap">
+                <input
+                  type="text"
+                  list="${datalistId}"
+                  id="estado-input-${i}"
+                  value="${escapeAttr(row.estado)}"
+                  placeholder="Escolhe ou escreve..."
+                  oninput="updateEstadoInput(${i}, this.value)"
+                />
+                <datalist id="${datalistId}">
+                  ${optionsList.map(opt => `<option value="${escapeAttr(opt)}"></option>`).join('')}
+                </datalist>
+                <div class="estado-quick-pills" id="estado-pills-${i}">
+                  ${optionsList.map(opt => `
+                    <button
+                      type="button"
+                      class="estado-pill-btn ${row.estado === opt ? 'active' : ''}"
+                      onclick="selectEstadoPill(${i}, '${escapeAttr(opt)}')">
+                      ${escapeHtml(opt)}
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
             </td>
           </tr>
         `;
@@ -1298,8 +1475,62 @@
 
     function updateRow(idx, field, val) {
       if (!anexoRows[idx]) return;
+      const wasCertOrElev = isCertificadoOuElevador(anexoRows[idx].eq);
       anexoRows[idx][field] = val;
-      saveLocalState();
+      if (field === 'eq') {
+        const nowCertOrElev = isCertificadoOuElevador(val);
+        if (wasCertOrElev !== nowCertOrElev) {
+          refreshEstadoControlsForRow(idx);
+        }
+      }
+      markDirtyAndSave();
+    }
+
+    function updateEstadoInput(idx, val) {
+      if (!anexoRows[idx]) return;
+      anexoRows[idx].estado = val;
+      const pillsWrap = document.getElementById(`estado-pills-${idx}`);
+      if (pillsWrap) {
+        pillsWrap.querySelectorAll('.estado-pill-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.textContent.trim() === val.trim());
+        });
+      }
+      markDirtyAndSave();
+    }
+
+    function selectEstadoPill(idx, val) {
+      if (!anexoRows[idx]) return;
+      anexoRows[idx].estado = val;
+      const inp = document.getElementById(`estado-input-${idx}`);
+      if (inp) inp.value = val;
+      const pillsWrap = document.getElementById(`estado-pills-${idx}`);
+      if (pillsWrap) {
+        pillsWrap.querySelectorAll('.estado-pill-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.textContent.trim() === val);
+        });
+      }
+      markDirtyAndSave();
+    }
+
+    function refreshEstadoControlsForRow(idx) {
+      const row = anexoRows[idx];
+      if (!row) return;
+      const optionsList = getEstadoOptionsForRow(row);
+      const datalist = document.getElementById(`estado-list-${idx}`);
+      const pillsWrap = document.getElementById(`estado-pills-${idx}`);
+      if (datalist) {
+        datalist.innerHTML = optionsList.map(opt => `<option value="${escapeAttr(opt)}"></option>`).join('');
+      }
+      if (pillsWrap) {
+        pillsWrap.innerHTML = optionsList.map(opt => `
+          <button
+            type="button"
+            class="estado-pill-btn ${row.estado === opt ? 'active' : ''}"
+            onclick="selectEstadoPill(${idx}, '${escapeAttr(opt)}')">
+            ${escapeHtml(opt)}
+          </button>
+        `).join('');
+      }
     }
 
     function addAnexoRow() {
@@ -1307,7 +1538,7 @@
       anexoRows.push(newRow);
       highlightedRowId = newRow.id;
       renderAnexoRows();
-      saveLocalState();
+      markDirtyAndSave();
       scrollToRowId(newRow.id);
     }
 
@@ -1318,7 +1549,7 @@
         anexoRows.splice(idx, 1);
       }
       renderAnexoRows();
-      saveLocalState();
+      markDirtyAndSave();
     }
 
     function handleRowPhoto(e, idx) {
@@ -1328,7 +1559,7 @@
         anexoRows[idx].foto = dataUrl;
         highlightedRowId = anexoRows[idx].id;
         renderAnexoRows();
-        saveLocalState();
+        markDirtyAndSave();
         scrollToRowId(anexoRows[idx].id);
       });
       e.target.value = '';
@@ -1355,7 +1586,7 @@
         }
         highlightedRowId = targetRow.id;
         renderAnexoRows();
-        saveLocalState();
+        markDirtyAndSave();
         scrollToRowId(targetRow.id);
       });
       e.target.value = '';
@@ -1392,16 +1623,18 @@
       reader.readAsDataURL(file);
     }
 
-    /* Modal e Exportacao por Partes vs Completo */
+    /* Modal e Exportacao por Instalação / Partes vs Completo */
     function openSaveOptionsModal() {
       saveCurrentStoreDraft();
       refreshPartBadge();
+      const storeLabel = currentStoreName || 'Instalação Atual';
       const approxBytes = estimateCurrentPayloadBytes();
       const mbStr = (approxBytes / (1024 * 1024)).toFixed(2);
       const photoCount = anexoRows.filter(r => r.foto).length;
+      document.getElementById('modalStoreName').textContent = storeLabel;
       document.getElementById('saveModalSummary').innerHTML =
-        `Anexo atual: <strong>${anexoRows.length} linha(s)</strong> (${photoCount} foto(s)) · Tamanho estimado: <strong>${mbStr} MB</strong>.<br/>` +
-        `Usa <strong>Parte</strong> para guardar continuações e limpar o anexo; usa <strong>Completo</strong> no último envio.`;
+        `Instalação: <strong>${escapeHtml(storeLabel)}</strong> · Anexo atual: <strong>${anexoRows.length} linha(s)</strong> (${photoCount} foto(s)) · Tamanho estimado: <strong>${mbStr} MB</strong>.<br/>` +
+        `Este ficheiro é <strong>apenas desta instalação</strong>. Usa <strong>Parte</strong> para continuações e <strong>Completo</strong> no último envio desta instalação antes de avançares.`;
       document.getElementById('saveOptionsModal').classList.add('open');
     }
 
@@ -1420,20 +1653,22 @@
       });
       if (ok) {
         partCounterBySession[key] = partNum;
-        // Limpa o anexo para libertar memoria da sessao
-        anexoRows = [createEmptyAnexoRow()];
+        exportedSummaryBySession[key] = `Parte ${partNum}`;
+        hasUnsavedStoreChanges = false;
+        anexoRows = createDefaultAnexoRows(false);
         highlightedRowId = null;
         if (currentStoreName && visitsByStore[currentStoreName]) {
           visitsByStore[currentStoreName].anexoRows = JSON.parse(JSON.stringify(anexoRows));
         }
         refreshPartBadge();
+        refreshInstallationFlowBadge();
         renderAnexoRows();
         saveLocalState();
         closeSaveOptionsModal();
       }
     }
 
-    async function exportVisitComplete(clearAnnexAfter) {
+    async function exportVisitComplete(clearAnnexAfter, goNextStoreAfter) {
       const partNum = getNextPartNumber();
       const key = getPartSessionKey();
       const hasPriorParts = partNum > 1;
@@ -1449,8 +1684,10 @@
         if (hasPriorParts) {
           partCounterBySession[key] = partNum;
         }
+        exportedSummaryBySession[key] = suffix;
+        hasUnsavedStoreChanges = false;
         if (clearAnnexAfter) {
-          anexoRows = [createEmptyAnexoRow()];
+          anexoRows = createDefaultAnexoRows(false);
           highlightedRowId = null;
           if (currentStoreName && visitsByStore[currentStoreName]) {
             visitsByStore[currentStoreName].anexoRows = JSON.parse(JSON.stringify(anexoRows));
@@ -1458,8 +1695,12 @@
           renderAnexoRows();
         }
         refreshPartBadge();
+        refreshInstallationFlowBadge();
         saveLocalState();
         closeSaveOptionsModal();
+        if (goNextStoreAfter) {
+          nextVisitInstallation();
+        }
       }
     }
 
@@ -1494,7 +1735,7 @@
           try {
             await navigator.share({
               title: fileName,
-              text: `Visita Técnica LMSI (${opts.suffixLabel})`,
+              text: `Visita Técnica LMSI — ${storeName} (${opts.suffixLabel})`,
               files: [new File([blob], fileName, { type: 'application/json' })]
             });
             return true;
@@ -1567,7 +1808,8 @@
           anexoRows,
           auditorNotes,
           visitsByStore,
-          partCounterBySession
+          partCounterBySession,
+          exportedSummaryBySession
         }));
       } catch (_) {
         quotaHit = true;
@@ -1585,6 +1827,7 @@
         if (data.visitDate) document.getElementById('visitDate').value = data.visitDate;
         if (data.visitsByStore && typeof data.visitsByStore === 'object') visitsByStore = data.visitsByStore;
         if (data.partCounterBySession && typeof data.partCounterBySession === 'object') partCounterBySession = data.partCounterBySession;
+        if (data.exportedSummaryBySession && typeof data.exportedSummaryBySession === 'object') exportedSummaryBySession = data.exportedSummaryBySession;
         if (Array.isArray(data.conservacaoRows) && data.conservacaoRows.length) conservacaoRows = data.conservacaoRows;
         if (Array.isArray(data.anexoRows) && data.anexoRows.length) anexoRows = data.anexoRows;
         if (typeof data.auditorNotes === 'string') auditorNotes = data.auditorNotes;
